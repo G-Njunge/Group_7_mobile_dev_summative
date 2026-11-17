@@ -1,0 +1,17 @@
+rules_version = '2';
+
+// TEMPORARY rules so auth can be developed. M5 replaces these with the full
+// rules for every collection (see the Firestore contract in README.md).
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Owner-only access to your own profile doc (doc ID = Firebase Auth uid).
+    match /users/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Everything else stays locked until M5's rules land.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

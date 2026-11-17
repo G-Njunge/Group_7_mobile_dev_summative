@@ -1,4 +1,4 @@
-package com.example.hakikisha_summative
+package com.hakikisha.app
 
 import io.flutter.embedding.android.FlutterActivity
 

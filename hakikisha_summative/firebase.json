@@ -1,0 +1,25 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "hakikisha-acd9a",
+          "appId": "1:183764806924:android:63de4f6dd5b5b4ba75ad29",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "hakikisha-acd9a",
+          "configurations": {
+            "android": "1:183764806924:android:63de4f6dd5b5b4ba75ad29",
+            "web": "1:183764806924:web:6b829265130796ac75ad29"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "rules": "firestore.rules"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "183764806924",
+    "project_id": "hakikisha-acd9a",
+    "storage_bucket": "hakikisha-acd9a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:183764806924:android:63de4f6dd5b5b4ba75ad29",
+        "android_client_info": {
+          "package_name": "com.hakikisha.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBk9wrtPALH03xL4CKPEKqSSRj7xb4Qi3g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
