@@ -6,7 +6,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../domain/entities/pharmacy_coordinates.dart';
 import '../../domain/entities/pharmacy_entity.dart';
+import '../../domain/utils/pharmacy_search.dart';
 import '../bloc/pharmacy_map_cubit.dart';
 import '../bloc/pharmacy_map_state.dart';
 
@@ -30,6 +32,7 @@ class _PharmacyMapView extends StatefulWidget {
 class _PharmacyMapViewState extends State<_PharmacyMapView> {
   final MapController _mapController = MapController();
   List<PharmacyEntity> _lastPharmacies = const [];
+  PharmacyCoordinates? _lastCurrentLocation;
 
   @override
   void initState() {
@@ -48,12 +51,25 @@ class _PharmacyMapViewState extends State<_PharmacyMapView> {
     BuildContext context,
   ) => BlocConsumer<PharmacyMapCubit, PharmacyMapState>(
     listenWhen: (previous, current) =>
-        previous.pharmacies != current.pharmacies,
+        previous.pharmacies != current.pharmacies ||
+        previous.currentLocation != current.currentLocation ||
+        previous.locationError != current.locationError,
     listener: (context, state) {
       if (state.pharmacies.isNotEmpty && state.pharmacies != _lastPharmacies) {
         _fitPharmacies(state.pharmacies);
       }
+      if (state.currentLocation != null &&
+          state.currentLocation != _lastCurrentLocation) {
+        _moveTo(state.currentLocation!, zoom: 15);
+      }
+      if (state.locationError != null) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(content: Text(state.locationError!)));
+        context.read<PharmacyMapCubit>().clearLocationError();
+      }
       _lastPharmacies = state.pharmacies;
+      _lastCurrentLocation = state.currentLocation;
     },
     builder: (context, state) => Scaffold(
       appBar: AppBar(title: const Text('Pharmacy map')),
@@ -86,8 +102,9 @@ class _PharmacyMapViewState extends State<_PharmacyMapView> {
                     .min(176.0, constraints.maxHeight * 0.3)
                     .toDouble(),
                 pharmacies: state.visiblePharmacies,
+                currentLocation: state.currentLocation,
                 onSelected: (pharmacy) {
-                  _moveTo(pharmacy, zoom: 15);
+                  _moveTo(pharmacy.coordinates, zoom: 15);
                   _showPharmacyDetails(context, pharmacy);
                 },
               ),
@@ -125,6 +142,25 @@ class _PharmacyMapViewState extends State<_PharmacyMapView> {
                             : 'No pharmacies match your search.',
                       ),
                     ),
+                  Positioned(
+                    right: 16,
+                    bottom: 24,
+                    child: FloatingActionButton(
+                      tooltip: 'Locate me',
+                      onPressed: state.isLocating
+                          ? null
+                          : () => unawaited(
+                              context.read<PharmacyMapCubit>().locateMe(),
+                            ),
+                      child: state.isLocating
+                          ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.my_location),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -164,6 +200,20 @@ class _PharmacyMapViewState extends State<_PharmacyMapView> {
                 ),
               ),
             ),
+          if (state.currentLocation != null)
+            Marker(
+              point: LatLng(
+                state.currentLocation!.latitude,
+                state.currentLocation!.longitude,
+              ),
+              width: 32,
+              height: 32,
+              child: const Icon(
+                Icons.my_location,
+                color: Colors.blue,
+                size: 24,
+              ),
+            ),
         ],
       ),
       const RichAttributionWidget(
@@ -172,8 +222,11 @@ class _PharmacyMapViewState extends State<_PharmacyMapView> {
     ],
   );
 
-  void _moveTo(PharmacyEntity pharmacy, {required double zoom}) {
-    _mapController.move(LatLng(pharmacy.latitude, pharmacy.longitude), zoom);
+  void _moveTo(PharmacyCoordinates coordinates, {required double zoom}) {
+    _mapController.move(
+      LatLng(coordinates.latitude, coordinates.longitude),
+      zoom,
+    );
   }
 
   void _fitPharmacies(List<PharmacyEntity> pharmacies) {
@@ -226,11 +279,13 @@ class _SearchResults extends StatelessWidget {
   const _SearchResults({
     required this.maxHeight,
     required this.pharmacies,
+    required this.currentLocation,
     required this.onSelected,
   });
 
   final double maxHeight;
   final List<PharmacyEntity> pharmacies;
+  final PharmacyCoordinates? currentLocation;
   final ValueChanged<PharmacyEntity> onSelected;
 
   @override
@@ -252,6 +307,12 @@ class _SearchResults extends StatelessWidget {
         itemCount: pharmacies.length,
         itemBuilder: (context, index) {
           final pharmacy = pharmacies[index];
+          final distance = currentLocation == null
+              ? null
+              : PharmacySearch.distanceKm(
+                  currentLocation!,
+                  pharmacy.coordinates,
+                );
           return ListTile(
             dense: true,
             leading: Icon(
@@ -262,7 +323,9 @@ class _SearchResults extends StatelessWidget {
             ),
             title: Text(pharmacy.name),
             subtitle: Text(
-              pharmacy.address,
+              distance == null
+                  ? pharmacy.address
+                  : '${pharmacy.address} · ${distance.toStringAsFixed(1)} km',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),

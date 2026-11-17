@@ -2,14 +2,18 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../domain/entities/pharmacy_coordinates.dart';
 import '../../domain/entities/pharmacy_entity.dart';
 import '../../domain/repositories/pharmacy_repository.dart';
+import '../../domain/services/pharmacy_location_service.dart';
 import 'pharmacy_map_state.dart';
 
 class PharmacyMapCubit extends Cubit<PharmacyMapState> {
-  PharmacyMapCubit(this._repository) : super(const PharmacyMapState());
+  PharmacyMapCubit(this._repository, this._locationService)
+    : super(const PharmacyMapState());
 
   final PharmacyRepository _repository;
+  final PharmacyLocationService _locationService;
   StreamSubscription<List<PharmacyEntity>>? _subscription;
 
   Future<void> start() async {
@@ -38,6 +42,20 @@ class PharmacyMapCubit extends Cubit<PharmacyMapState> {
   }
 
   void setSearchQuery(String query) => emit(state.copyWith(searchQuery: query));
+
+  Future<PharmacyCoordinates?> locateMe() async {
+    emit(state.copyWith(isLocating: true, clearLocationError: true));
+    try {
+      final location = await _locationService.getCurrentLocation();
+      emit(state.copyWith(currentLocation: location, isLocating: false));
+      return location;
+    } on PharmacyLocationFailure catch (failure) {
+      emit(state.copyWith(isLocating: false, locationError: failure.message));
+      return null;
+    }
+  }
+
+  void clearLocationError() => emit(state.copyWith(clearLocationError: true));
 
   @override
   Future<void> close() async {
