@@ -1,4 +1,6 @@
-class ScanEntity {
+import 'package:equatable/equatable.dart';
+
+class ScanEntity extends Equatable {
   final String scanId;
   final String userId;
   final String? batchId;
@@ -14,4 +16,14 @@ class ScanEntity {
     required this.method,
     required this.scannedAt,
   });
+
+  @override
+  List<Object?> get props => [
+    scanId,
+    userId,
+    batchId,
+    result,
+    method,
+    scannedAt,
+  ];
 }
