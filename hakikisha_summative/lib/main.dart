@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
+import 'features/auth/presentation/pages/landing_page.dart';
 import 'firebase_options.dart';
 
 // get_it setup and go_router are added once M5's core lands.
@@ -21,7 +22,8 @@ class HakikishaApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0F3D1E)),
       ),
-      home: const Scaffold(body: Center(child: Text('Hakikisha'))),
+      // Temporary: the AuthGate (M1) / go_router (M5) picks the first screen later.
+      home: const LandingPage(),
     );
   }
 }
