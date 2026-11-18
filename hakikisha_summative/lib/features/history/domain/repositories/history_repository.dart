@@ -1,7 +1,7 @@
-import '../entities/scan_entity.dart';
+import '../entities/scan_summary.dart';
 
 abstract class HistoryRepository {
-  Stream<List<ScanEntity>> watchScans(String userId);
+  Stream<List<ScanSummary>> watchScans(String userId);
 
   Future<void> deleteScan(String scanId);
 }
