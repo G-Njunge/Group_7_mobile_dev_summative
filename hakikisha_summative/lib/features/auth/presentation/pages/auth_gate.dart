@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/auth_bloc.dart';
 import '../widgets/waves_background.dart';
 import 'landing_page.dart';
-import 'signed_in_placeholder_page.dart';
+import 'home_hub_page.dart';
 import 'verify_email_page.dart';
 
 /// Picks the first screen from the AuthBloc's status.
@@ -32,7 +32,7 @@ class AuthGate extends StatelessWidget {
         AuthStatus.unverified => VerifyEmailPage(
           email: state.user?.email ?? '',
         ),
-        AuthStatus.authenticated => const SignedInPlaceholderPage(),
+        AuthStatus.authenticated => const HomeHubPage(),
       },
     );
   }
