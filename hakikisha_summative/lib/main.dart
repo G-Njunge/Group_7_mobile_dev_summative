@@ -1,27 +1,26 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
+import 'app.dart';
+import 'core/di/injection.dart';
+import 'core/router/app_router.dart';
+import 'core/session/session_cubit.dart';
+import 'features/settings/presentation/bloc/settings_cubit.dart';
 import 'firebase_options.dart';
 
-// get_it setup and go_router are added once M5's core lands.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const HakikishaApp());
-}
+  await configureDependencies();
 
-class HakikishaApp extends StatelessWidget {
-  const HakikishaApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Hakikisha',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0F3D1E)),
-      ),
-      home: const Scaffold(body: Center(child: Text('Hakikisha'))),
-    );
-  }
+  // App-lifetime cubits: created once here, so the router and the whole
+  // widget tree share the same instances.
+  final session = sl<SessionCubit>();
+  runApp(
+    HakikishaApp(
+      router: createAppRouter(session),
+      sessionCubit: session,
+      settingsCubit: sl<SettingsCubit>(),
+    ),
+  );
 }
