@@ -25,6 +25,12 @@ abstract interface class AuthRepository {
 
   Future<AppUser> logIn({required String email, required String password});
 
+  /// Signs in with Google. Returns `null` if the user cancelled (not an
+  /// error). On the first Google sign-in, creates the `users` doc with
+  /// `authProvider: 'google'` and no phone; later sign-ins leave it alone.
+  Future<AppUser?> signInWithGoogle();
+
+  /// Signs out of Firebase (and Google, so the account picker shows again).
   Future<void> logOut();
 
   /// Sends a reset link. Succeeds even for unregistered emails, because

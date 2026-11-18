@@ -76,8 +76,43 @@ class AuthRepositoryImpl implements AuthRepository {
           email: email.trim(),
           password: password,
         );
+        try {
+          // If Google was just refused for this email, connect it now.
+          await _remote.linkPendingGoogle(user);
+        } on FirebaseException {
+          // Linking is a bonus; never block a successful password login.
+        }
         return _toAppUser(user)!;
       });
+
+  @override
+  Future<AppUser?> signInWithGoogle() => _guard(() async {
+    final user = await _remote.signInWithGoogle();
+    if (user == null) return null; // Cancelled: not an error.
+
+    try {
+      // Only on the first Google sign-in, so a second login never
+      // overwrites the profile (M3's Edit profile may have changed it).
+      if (!await _remote.userDocExists(user.uid)) {
+        await _remote.createUserDoc(
+          UserModel(
+            uid: user.uid,
+            fullName: user.displayName ?? '',
+            email: user.email ?? '',
+            authProvider: UserModel.providerGoogle,
+            photoUrl: user.photoURL,
+          ),
+        );
+      }
+    } on FirebaseException {
+      // Without a users doc the profile screens have nothing to show, so
+      // don't leave the user half signed in. They can simply try again.
+      await _remote.signOut();
+      rethrow;
+    }
+
+    return _toAppUser(user);
+  });
 
   @override
   Future<void> logOut() => _guard(_remote.signOut);
