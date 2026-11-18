@@ -8,6 +8,7 @@ import '../widgets/auth_band_scaffold.dart';
 import '../widgets/auth_buttons.dart';
 import '../widgets/auth_snackbar.dart';
 import '../widgets/auth_text_field.dart';
+import '../widgets/continue_with_google.dart';
 import 'forgot_password_page.dart';
 import 'register_page.dart';
 
@@ -117,6 +118,7 @@ class _LoginViewState extends State<LoginView> {
                   loadingLabel: 'Logging in…',
                   onPressed: _submit,
                 ),
+                ContinueWithGoogle(enabled: !state.isSubmitting),
                 const SizedBox(height: 8),
                 AuthLinkRow(
                   prompt: 'No account?',

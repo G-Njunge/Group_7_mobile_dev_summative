@@ -7,6 +7,7 @@ import 'data/repositories/auth_repository_impl.dart';
 import 'domain/repositories/auth_repository.dart';
 import 'presentation/bloc/auth_bloc.dart';
 import 'presentation/bloc/forgot_password_cubit.dart';
+import 'presentation/bloc/google_sign_in_cubit.dart';
 import 'presentation/bloc/login_cubit.dart';
 import 'presentation/bloc/register_cubit.dart';
 import 'presentation/bloc/verify_email_cubit.dart';
@@ -43,5 +44,8 @@ void registerAuthPresentation(GetIt sl) {
     )
     ..registerFactory<VerifyEmailCubit>(
       () => VerifyEmailCubit(sl<AuthRepository>()),
+    )
+    ..registerFactory<GoogleSignInCubit>(
+      () => GoogleSignInCubit(sl<AuthRepository>()),
     );
 }

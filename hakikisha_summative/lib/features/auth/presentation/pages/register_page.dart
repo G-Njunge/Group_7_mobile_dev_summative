@@ -8,6 +8,7 @@ import '../widgets/auth_band_scaffold.dart';
 import '../widgets/auth_buttons.dart';
 import '../widgets/auth_snackbar.dart';
 import '../widgets/auth_text_field.dart';
+import '../widgets/continue_with_google.dart';
 import 'login_page.dart';
 
 /// 04 Register. On success the new user is unverified, so the AuthGate shows
@@ -136,6 +137,7 @@ class _RegisterViewState extends State<RegisterView> {
                   loadingLabel: 'Creating account…',
                   onPressed: _submit,
                 ),
+                ContinueWithGoogle(enabled: !busy),
                 const SizedBox(height: 8),
                 AuthLinkRow(
                   prompt: 'Already registered?',
