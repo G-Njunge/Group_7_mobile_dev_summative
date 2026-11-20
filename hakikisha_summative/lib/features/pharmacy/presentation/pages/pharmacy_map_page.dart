@@ -5,8 +5,12 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter/services.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../../../auth/presentation/widgets/auth_colors.dart';
+import '../../../auth/presentation/widgets/neumorphic.dart';
 import '../../domain/entities/pharmacy_coordinates.dart';
 import '../../domain/entities/pharmacy_entity.dart';
 import '../../domain/utils/pharmacy_search.dart';
@@ -73,99 +77,200 @@ class _PharmacyMapViewState extends State<_PharmacyMapView> {
       _lastCurrentLocation = state.currentLocation;
     },
     builder: (context, state) => Scaffold(
-      appBar: AppBar(title: const Text('Pharmacy map')),
-      body: LayoutBuilder(
-        builder: (context, constraints) => Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-              child: TextField(
-                onChanged: context.read<PharmacyMapCubit>().setSearchQuery,
-                decoration: InputDecoration(
-                  hintText: 'Search name, address, license, or phone',
-                  prefixIcon: const Icon(Icons.search),
-                  suffixIcon: state.searchQuery.isEmpty
-                      ? null
-                      : IconButton(
-                          tooltip: 'Clear search',
-                          onPressed: () => context
-                              .read<PharmacyMapCubit>()
-                              .setSearchQuery(''),
-                          icon: const Icon(Icons.clear),
-                        ),
-                  border: const OutlineInputBorder(),
-                ),
-              ),
-            ),
-            if (state.searchQuery.trim().isNotEmpty)
-              _SearchResults(
-                maxHeight: math
-                    .min(176.0, constraints.maxHeight * 0.3)
-                    .toDouble(),
-                pharmacies: state.visiblePharmacies,
-                currentLocation: state.currentLocation,
-                onSelected: (pharmacy) {
-                  _moveTo(pharmacy.coordinates, zoom: 15);
-                  _showPharmacyDetails(context, pharmacy);
-                },
-              ),
-            Expanded(
-              child: Stack(
+      appBar: AppBar(
+        title: const Text('Pharmacy map'),
+        backgroundColor: AuthColors.surface,
+        surfaceTintColor: Colors.transparent,
+      ),
+      body: ColoredBox(
+        color: AuthColors.surface,
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: LayoutBuilder(
+              builder: (context, constraints) => Column(
                 children: [
-                  _buildMap(state),
-                  if (state.status == PharmacyMapStatus.loading)
-                    const _MapMessage(child: CircularProgressIndicator()),
-                  if (state.status == PharmacyMapStatus.error)
-                    _MapMessage(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            state.errorMessage ?? 'Could not load pharmacies.',
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 12),
-                          FilledButton(
-                            onPressed: () => unawaited(
-                              context.read<PharmacyMapCubit>().start(),
-                            ),
-                            child: const Text('Retry'),
-                          ),
-                        ],
-                      ),
-                    ),
-                  if (state.status == PharmacyMapStatus.loaded &&
-                      state.visiblePharmacies.isEmpty)
-                    _MapMessage(
-                      child: Text(
-                        state.searchQuery.trim().isEmpty
-                            ? 'No pharmacies found.'
-                            : 'No pharmacies match your search.',
-                      ),
-                    ),
-                  Positioned(
-                    right: 16,
-                    bottom: 24,
-                    child: FloatingActionButton(
-                      tooltip: 'Locate me',
-                      onPressed: state.isLocating
+                  TextField(
+                    onChanged: context.read<PharmacyMapCubit>().setSearchQuery,
+                    decoration: InputDecoration(
+                      hintText: 'Search name, address, license, or phone',
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: state.searchQuery.isEmpty
                           ? null
-                          : () => unawaited(
-                              context.read<PharmacyMapCubit>().locateMe(),
+                          : IconButton(
+                              tooltip: 'Clear search',
+                              onPressed: () => context
+                                  .read<PharmacyMapCubit>()
+                                  .setSearchQuery(''),
+                              icon: const Icon(Icons.clear),
                             ),
-                      child: state.isLocating
-                          ? const SizedBox(
-                              width: 22,
-                              height: 22,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.my_location),
+                      filled: true,
+                      fillColor: AuthColors.field,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide.none,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide.none,
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: const BorderSide(
+                          color: AuthColors.primary,
+                          width: 1.5,
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (state.searchQuery.trim().isNotEmpty)
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: math.min(120.0, constraints.maxHeight * 0.2),
+                      ),
+                      child: _SearchResults(
+                        maxHeight: math.min(120.0, constraints.maxHeight * 0.2),
+                        pharmacies: state.visiblePharmacies,
+                        currentLocation: state.currentLocation,
+                        onSelected: (pharmacy) {
+                          _moveTo(pharmacy.coordinates, zoom: 15);
+                          _showPharmacyDetails(context, pharmacy);
+                        },
+                      ),
+                    ),
+                  const SizedBox(height: 14),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Expanded(
+                          flex: 6,
+                          child: DecoratedBox(
+                            decoration: Neu.raisedBox(
+                              radius: 22,
+                              color: Colors.white,
+                              distance: 4,
+                              blur: 10,
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(22),
+                              child: Stack(
+                                children: [
+                                  _buildMap(state),
+                                  if (state.status == PharmacyMapStatus.loading)
+                                    const _MapMessage(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  if (state.status == PharmacyMapStatus.error)
+                                    _MapMessage(
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            state.errorMessage ??
+                                                'Could not load pharmacies.',
+                                            textAlign: TextAlign.center,
+                                          ),
+                                          const SizedBox(height: 12),
+                                          FilledButton(
+                                            onPressed: () => unawaited(
+                                              context
+                                                  .read<PharmacyMapCubit>()
+                                                  .start(),
+                                            ),
+                                            child: const Text('Retry'),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  if (state.status ==
+                                          PharmacyMapStatus.loaded &&
+                                      state.visiblePharmacies.isEmpty)
+                                    _MapMessage(
+                                      child: Text(
+                                        state.searchQuery.trim().isEmpty
+                                            ? 'No pharmacies found.'
+                                            : 'No pharmacies match your search.',
+                                      ),
+                                    ),
+                                  Positioned(
+                                    top: 12,
+                                    right: 12,
+                                    child: _ZoomControls(
+                                      onZoomIn: () => _changeZoom(1),
+                                      onZoomOut: () => _changeZoom(-1),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    right: 16,
+                                    bottom: 20,
+                                    child: FloatingActionButton(
+                                      tooltip: 'Locate me',
+                                      onPressed: state.isLocating
+                                          ? null
+                                          : () => unawaited(
+                                              context
+                                                  .read<PharmacyMapCubit>()
+                                                  .locateMe(),
+                                            ),
+                                      child: state.isLocating
+                                          ? const SizedBox(
+                                              width: 22,
+                                              height: 22,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                              ),
+                                            )
+                                          : const Icon(Icons.my_location),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                state.searchQuery.trim().isEmpty
+                                    ? 'Nearby pharmacies'
+                                    : 'Matching pharmacies',
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(
+                                      color: AuthColors.primary,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                              ),
+                            ),
+                            if (state.currentLocation == null)
+                              Text(
+                                'Locate to see distances',
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(color: AuthColors.textMuted),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Expanded(
+                          flex: 4,
+                          child: _NearbyPharmacies(
+                            pharmacies: state.visiblePharmacies,
+                            currentLocation: state.currentLocation,
+                            onSelected: (pharmacy) {
+                              _moveTo(pharmacy.coordinates, zoom: 15);
+                              _showPharmacyDetails(context, pharmacy);
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     ),
@@ -230,6 +335,12 @@ class _PharmacyMapViewState extends State<_PharmacyMapView> {
     );
   }
 
+  void _changeZoom(double delta) {
+    final camera = _mapController.camera;
+    final zoom = (camera.zoom + delta).clamp(3.0, 18.0).toDouble();
+    _mapController.move(camera.center, zoom);
+  }
+
   void _fitPharmacies(List<PharmacyEntity> pharmacies) {
     final points = pharmacies
         .map((pharmacy) => LatLng(pharmacy.latitude, pharmacy.longitude))
@@ -269,9 +380,201 @@ class _PharmacyMapViewState extends State<_PharmacyMapView> {
             Text(pharmacy.verified ? 'Verified pharmacy' : 'Not verified'),
             if (pharmacy.phone.trim().isNotEmpty)
               Text('Phone: ${pharmacy.phone}'),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 12,
+              runSpacing: 8,
+              children: [
+                FilledButton.icon(
+                  onPressed: () => unawaited(
+                    _launchExternalUrl(
+                      context,
+                      Uri.https('www.google.com', '/maps/dir/', {
+                        'api': '1',
+                        'destination':
+                            '${pharmacy.latitude},${pharmacy.longitude}',
+                      }),
+                      'Could not open directions.',
+                    ),
+                  ),
+                  icon: const Icon(Icons.directions),
+                  label: const Text('Directions'),
+                ),
+                if (pharmacy.phone.trim().isNotEmpty)
+                  OutlinedButton.icon(
+                    onPressed: () => unawaited(
+                      _launchExternalUrl(
+                        context,
+                        Uri(scheme: 'tel', path: pharmacy.phone.trim()),
+                        'Could not open the phone app.',
+                      ),
+                    ),
+                    icon: const Icon(Icons.call_outlined),
+                    label: const Text('Call'),
+                  ),
+              ],
+            ),
           ],
         ),
       ),
+    );
+  }
+
+  Future<void> _launchExternalUrl(
+    BuildContext context,
+    Uri uri,
+    String errorMessage,
+  ) async {
+    try {
+      final launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!launched && context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(errorMessage)));
+      }
+    } on PlatformException {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(errorMessage)));
+      }
+    }
+  }
+}
+
+class _ZoomControls extends StatelessWidget {
+  const _ZoomControls({required this.onZoomIn, required this.onZoomOut});
+
+  final VoidCallback onZoomIn;
+  final VoidCallback onZoomOut;
+
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: Neu.raisedBox(radius: 16, distance: 3, blur: 8),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          tooltip: 'Zoom in',
+          onPressed: onZoomIn,
+          icon: const Icon(Icons.add),
+        ),
+        const SizedBox(
+          width: 32,
+          child: Divider(height: 1, color: AuthColors.shadowDark),
+        ),
+        IconButton(
+          tooltip: 'Zoom out',
+          onPressed: onZoomOut,
+          icon: const Icon(Icons.remove),
+        ),
+      ],
+    ),
+  );
+}
+
+class _NearbyPharmacies extends StatelessWidget {
+  const _NearbyPharmacies({
+    required this.pharmacies,
+    required this.currentLocation,
+    required this.onSelected,
+  });
+
+  final List<PharmacyEntity> pharmacies;
+  final PharmacyCoordinates? currentLocation;
+  final ValueChanged<PharmacyEntity> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    if (pharmacies.isEmpty) {
+      return Center(
+        child: Text(
+          currentLocation == null
+              ? 'No pharmacies found.'
+              : 'No nearby pharmacies found.',
+          style: Theme.of(context).textTheme.bodyMedium
+              ?.copyWith(color: AuthColors.textMuted),
+        ),
+      );
+    }
+
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(2, 4, 2, 8),
+      itemCount: pharmacies.length,
+      separatorBuilder: (_, _) => const SizedBox(height: 10),
+      itemBuilder: (context, index) {
+        final pharmacy = pharmacies[index];
+        final distance = currentLocation == null
+            ? null
+            : PharmacySearch.distanceKm(currentLocation!, pharmacy.coordinates);
+        return DecoratedBox(
+          decoration: Neu.raisedBox(radius: 16, distance: 3, blur: 8),
+          child: Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(16),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: () => onSelected(pharmacy),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: Neu.raisedCircle(distance: 2, blur: 5),
+                      child: Icon(
+                        Icons.local_pharmacy_outlined,
+                        color: pharmacy.verified
+                            ? AuthColors.primary
+                            : AuthColors.error,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            pharmacy.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: AuthColors.primary,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            distance == null
+                                ? pharmacy.address
+                                : '${distance.toStringAsFixed(1)} km away · ${pharmacy.address}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: AuthColors.textMuted,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const Icon(
+                      Icons.chevron_right,
+                      color: AuthColors.textMuted,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

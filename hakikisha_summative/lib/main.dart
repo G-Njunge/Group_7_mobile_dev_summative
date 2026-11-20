@@ -8,6 +8,7 @@ import 'features/auth/auth_injection.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/pages/auth_gate.dart';
 import 'features/pharmacy/pharmacy_injection.dart';
+import 'features/report/report_injection.dart';
 import 'firebase_options.dart';
 
 // go_router and the app-wide DI file are added once M5's core lands.
@@ -16,6 +17,7 @@ Future<void> main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   registerAuthDependencies(GetIt.instance);
   registerPharmacyDependencies(GetIt.instance);
+  registerReportDependencies(GetIt.instance);
 
   runApp(
     // One AuthBloc for the whole app, so every screen sees the same session.

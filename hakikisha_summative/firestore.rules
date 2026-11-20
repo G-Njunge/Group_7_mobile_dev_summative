@@ -15,6 +15,40 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Users may create their own counterfeit reports from the app.
+    match /reports/{reportId} {
+      allow read: if request.auth != null
+        && resource.data.userId == request.auth.uid;
+
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == 'pending'
+        && request.resource.data.description is string
+        && request.resource.data.description.size() > 0
+        && request.resource.data.description.size() <= 2000
+        && request.resource.data.description.matches('.*\\S.*')
+        && request.resource.data.pharmacyId is string
+        && request.resource.data.pharmacyId.size() > 0;
+
+      allow update: if request.auth != null
+        && resource.data.userId == request.auth.uid
+        && resource.data.status == 'pending'
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.status == resource.data.status
+        && request.resource.data.description is string
+        && request.resource.data.description.size() > 0
+        && request.resource.data.description.size() <= 2000
+        && request.resource.data.description.matches('.*\\S.*')
+        && request.resource.data.pharmacyId is string
+        && request.resource.data.pharmacyId.size() > 0
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['description', 'pharmacyId', 'updatedAt']);
+
+      allow delete: if request.auth != null
+        && resource.data.userId == request.auth.uid
+        && resource.data.status == 'pending';
+    }
+
     // Everything else stays locked until M5's rules land.
     match /{document=**} {
       allow read, write: if false;
