@@ -41,7 +41,8 @@ The app is connected to the Firebase project **`hakikisha-acd9a`** for Android (
 | `lib/firebase_options.dart` | Firebase keys for each platform, used by `Firebase.initializeApp()` in `main.dart` |
 | `android/app/google-services.json` | Android Firebase config |
 | `firebase.json` | FlutterFire and Firebase CLI config |
-| `firestore.rules` | Firestore security rules (currently temporary: users can only read/write their own `users/{uid}` doc; everything else is locked) |
+| `firestore.rules`, `storage.rules` | Security rules for every collection and for photo uploads. See [docs/database.md](docs/database.md) |
+| `firestore.indexes.json` | Composite indexes for the history and reports lists |
 
 - **Don't run `flutterfire configure`.** It's already done. Running it again can register duplicate apps or overwrite these files. If you think it needs re-running, ask in the group first.
 - **Console access:** you've been added as an Editor. Open the project at https://console.firebase.google.com/project/hakikisha-acd9a. Enabled so far: Email/Password sign-in and Firestore (production mode).
@@ -49,8 +50,9 @@ The app is connected to the Firebase project **`hakikisha-acd9a`** for Android (
   ```sh
   npm install -g firebase-tools
   firebase login
-  firebase deploy --only firestore:rules --project hakikisha-acd9a
+  firebase deploy --only firestore:rules,firestore:indexes,storage --project hakikisha-acd9a
   ```
+- **Storage** must be enabled in the console (Build → Storage) before report and profile photos can upload. New projects need the Blaze plan for Storage.
 - **Google sign-in (later):** each person's debug SHA-1 has to be added in the Firebase console before Google sign-in works on their machine. Get it with `cd android && ./gradlew signingReport` (needs the JDK) and send it to M1.
 
 ### 4. Packages already added
@@ -64,7 +66,54 @@ Everyone's packages are already in `pubspec.yaml`, so you shouldn't need to edit
 ### 5. Where your code goes
 The folder skeleton already exists: `lib/core/` and `lib/features/<feature>/{data,domain,presentation}` with matching `test/features/<feature>/` folders. The `.gitkeep` files only exist so git keeps the empty folders. Delete one once its folder has a real file in it.
 
-_Seed data and screenshots will be added as the project grows._
+### 6. Backend: seed data and rules tests
+The `backend/` folder is a small Node project (Node 20+, and Java 21+ for the emulators). It doesn't ship with the app.
+```sh
+cd backend
+npm install
+npm install -g firebase-tools
+npm test                 # starts the Firestore + Storage emulators and runs the rules tests
+npm run seed:emulator    # seeds medicines, batches and pharmacies into the emulator
+```
+To seed the real project, ask M5 for a service-account key. **Never commit it.**
+```sh
+GOOGLE_APPLICATION_CREDENTIALS=path/to/key.json npm run seed
+```
+Demo codes from the seed (`backend/seed/seed-data.json`):
+
+| Batch | Medicine | Expected result |
+|---|---|---|
+| `PA24-1150` | Panadol Advance 500mg | Genuine |
+| `PA23-0871` | Panadol Advance 500mg | Flagged (recalled) |
+| `CT24-0412` | Coartem 80/480 | Flagged (counterfeit) |
+| `ZN23-0098` | Zinnat 500mg | Valid batch but expired |
+
+### 7. Shared building blocks (`lib/core/`)
+Use these instead of restyling. They follow the Figma file and support light and dark mode.
+
+| Need | Use |
+|---|---|
+| Colours | `context.palette` (`brand`, `heading`, `text`, `textMuted`, `surface`, `danger`, …) |
+| Screen frame with menu or back tile, title and waves background | `AppScaffold(title: ..., body: ...)` |
+| Raised card / inset box | `NeuCard`, `NeuInset` |
+| Buttons | `PrimaryButton(loading: ...)`, `SecondaryButton` |
+| Form field with uppercase label and validator | `AppTextField` |
+| Genuine/Flagged toggle, filter tabs | `SegmentedPill` |
+| "RECENT SCANS" style heading | `SectionLabel` |
+| Yes/no dialog (delete, withdraw) | `showConfirmDialog(...)` |
+| Success / error feedback | `showAppSnackBar(context, msg, type: SnackType.success)` |
+| Collection names and enum values | `FirestoreCollections`, `ScanResult`, `BatchStatus`, … |
+| Routes | `AppRoutes.home`, … with `context.go` / `context.push` |
+| Sign-out, session state | `context.read<SessionCubit>()` |
+| User settings (scan sound, vibration, save history) | `context.read<SettingsCubit>().state.settings` |
+
+**Translations:** add each new string to both `lib/core/l10n/app_en.arb` and `app_sw.arb`, then use `AppLocalizations.of(context).yourKey`. The Dart code is generated on `flutter pub get` / `flutter run` (or run `flutter gen-l10n`).
+
+**Plugging in your feature:** in `lib/core/router/app_router.dart`, replace your `_placeholder(...)` with a `GoRoute` to your page. In `lib/core/di/injection.dart`, call your `register<Feature>Dependencies(sl)`.
+
+**Tests:** `test/helpers/pump_app.dart` has `tester.pumpPage(widget)` (theme, localizations, router) and a `FakeSessionSource`.
+
+_Screenshots will be added before submission._
 
 ## Team rules
 
@@ -105,7 +154,7 @@ These field names are the contract. Use them exactly in models, security rules a
 | `users` | **uid (PK)**, fullName, email, phone, authProvider (`password` / `google`), photoUrl, createdAt | Owner only |
 | `medicines` | **medicineId (PK)**, name, manufacturer, ppbRegNo, dosageForm, strength | Signed-in read, no client write |
 | `batches` | **batchId (PK)**, *medicineId (FK)*, batchNumber, gtin, expiryDate, status (`valid` / `recalled` / `counterfeit`) | Signed-in read, no client write |
-| `scans` | **scanId (PK)**, *userId (FK)*, *batchId (FK)*, result, method (`camera` / `manual` / `upload`), scannedAt | Create / read / delete own; no update |
+| `scans` | **scanId (PK)**, *userId (FK)*, *batchId (FK, null if not found)*, result (`genuine` / `flagged` / `notFound`), method (`camera` / `manual` / `upload`), scannedAt | Create / read / delete own; no update |
 | `reports` | **reportId (PK)**, *userId (FK)*, *scanId (FK, optional)*, *pharmacyId (FK, optional)*, description, photoUrls, status (`pending` / `reviewed`), createdAt, updatedAt | Own only; update / delete while pending |
 | `pharmacies` | **pharmacyId (PK)**, name, licenseNo, address, lat, lng, phone, verified | Signed-in read, no client write |
 
@@ -123,11 +172,11 @@ These field names are the contract. Use them exactly in models, security rules a
 - Branch off `main`, or off your own unmerged branch if you're waiting on a review, then rebase onto `main` once it merges.
 
 ### Before opening a PR
-There's no CI, so run these yourself:
+GitHub Actions (`.github/workflows/ci.yml`) runs these on every PR, plus the security rules tests. Run them locally first so CI stays green:
 ```sh
-dart format .
-flutter analyze      # must show 0 issues
-flutter test
+dart format lib test
+flutter analyze             # must show 0 issues
+flutter test --coverage
 ```
 
 ### Testing
