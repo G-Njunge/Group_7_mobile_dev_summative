@@ -9,8 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../auth/presentation/widgets/auth_colors.dart';
-import '../../../auth/presentation/widgets/neumorphic.dart';
+import '../../../../core/widgets/app_drawer.dart';
 import '../../domain/entities/pharmacy_coordinates.dart';
 import '../../domain/entities/pharmacy_entity.dart';
 import '../../domain/utils/pharmacy_search.dart';
@@ -77,19 +76,47 @@ class _PharmacyMapViewState extends State<_PharmacyMapView> {
       _lastCurrentLocation = state.currentLocation;
     },
     builder: (context, state) => Scaffold(
-      appBar: AppBar(
-        title: const Text('Pharmacy map'),
-        backgroundColor: AuthColors.surface,
-        surfaceTintColor: Colors.transparent,
-      ),
-      body: ColoredBox(
-        color: AuthColors.surface,
-        child: SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            child: LayoutBuilder(
-              builder: (context, constraints) => Column(
+      appBar: AppBar(title: const Text('Pharmacy map')),
+      // Reached from the drawer as a top-level route, so it needs the drawer
+      // to navigate away (the AppBar shows the menu button for it).
+      drawer: const AppDrawer(),
+      body: LayoutBuilder(
+        builder: (context, constraints) => Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+              child: TextField(
+                onChanged: context.read<PharmacyMapCubit>().setSearchQuery,
+                decoration: InputDecoration(
+                  hintText: 'Search name, address, license, or phone',
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: state.searchQuery.isEmpty
+                      ? null
+                      : IconButton(
+                          tooltip: 'Clear search',
+                          onPressed: () => context
+                              .read<PharmacyMapCubit>()
+                              .setSearchQuery(''),
+                          icon: const Icon(Icons.clear),
+                        ),
+                  border: const OutlineInputBorder(),
+                ),
+              ),
+            ),
+            if (state.searchQuery.trim().isNotEmpty)
+              _SearchResults(
+                maxHeight: math
+                    .min(176.0, constraints.maxHeight * 0.3)
+                    .toDouble(),
+                pharmacies: state.visiblePharmacies,
+                currentLocation: state.currentLocation,
+                onSelected: (pharmacy) {
+                  _moveTo(pharmacy.coordinates, zoom: 15);
+                  _showPharmacyDetails(context, pharmacy);
+                },
+              ),
+            Expanded(
+              child: Stack(
                 children: [
                   TextField(
                     onChanged: context.read<PharmacyMapCubit>().setSearchQuery,
