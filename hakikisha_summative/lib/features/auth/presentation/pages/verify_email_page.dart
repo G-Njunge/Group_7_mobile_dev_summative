@@ -1,27 +1,85 @@
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 
+import '../bloc/auth_bloc.dart';
+import '../bloc/form_status.dart';
+import '../bloc/verify_email_cubit.dart';
 import '../widgets/auth_band_scaffold.dart';
 import '../widgets/auth_buttons.dart';
 import '../widgets/auth_colors.dart';
+import '../widgets/auth_snackbar.dart';
 
-/// A3 Verify email.
+/// A3 Verify email. Shown by the AuthGate while the user is unverified.
 ///
-/// [resendSecondsLeft] is the resend cooldown: while it's set, the resend
-/// button is disabled and shows a countdown. The AuthBloc provides both
-/// values and handles the buttons in Phase 2.
+/// - "I've verified" asks the [AuthBloc] to re-check; once verified, the
+///   AuthGate moves on by itself.
+/// - "Resend email" uses [VerifyEmailCubit], which adds a 60s cooldown.
+/// - "Change it" logs out, so the user can register with another email.
 class VerifyEmailPage extends StatelessWidget {
-  const VerifyEmailPage({
-    super.key,
-    required this.email,
-    this.resendSecondsLeft,
-  });
+  const VerifyEmailPage({super.key, required this.email});
 
   final String email;
-  final int? resendSecondsLeft;
 
   @override
   Widget build(BuildContext context) {
-    final cooldown = resendSecondsLeft;
+    return BlocProvider(
+      create: (_) => GetIt.instance<VerifyEmailCubit>(),
+      child: MultiBlocListener(
+        listeners: [
+          BlocListener<AuthBloc, AuthState>(
+            listenWhen: (previous, current) =>
+                previous.verificationCheck != current.verificationCheck,
+            listener: (context, state) {
+              switch (state.verificationCheck) {
+                case VerificationCheck.notVerified:
+                  showAuthSnackBar(
+                    context,
+                    'Not verified yet. Tap the link in the email, then try '
+                    'again.',
+                    type: AuthSnackType.info,
+                  );
+                case VerificationCheck.failed:
+                  showAuthSnackBar(context, state.errorMessage!);
+                case VerificationCheck.idle || VerificationCheck.checking:
+                  break;
+              }
+            },
+          ),
+          BlocListener<VerifyEmailCubit, VerifyEmailState>(
+            listenWhen: (previous, current) =>
+                previous.status != current.status,
+            listener: (context, state) {
+              if (state.status == FormStatus.success) {
+                showAuthSnackBar(
+                  context,
+                  'We’ve sent a new link to $email.',
+                  type: AuthSnackType.success,
+                );
+              } else if (state.status == FormStatus.failure) {
+                showAuthSnackBar(context, state.errorMessage!);
+              }
+            },
+          ),
+        ],
+        child: _VerifyEmailView(email: email),
+      ),
+    );
+  }
+}
+
+class _VerifyEmailView extends StatelessWidget {
+  const _VerifyEmailView({required this.email});
+
+  final String email;
+
+  @override
+  Widget build(BuildContext context) {
+    final checking = context.select(
+      (AuthBloc bloc) =>
+          bloc.state.verificationCheck == VerificationCheck.checking,
+    );
+    final resend = context.watch<VerifyEmailCubit>().state;
 
     return AuthBandScaffold(
       badge: const AuthIconBadge(icon: Icons.mark_email_unread_outlined),
@@ -51,22 +109,29 @@ class VerifyEmailPage extends StatelessWidget {
           const SizedBox(height: 24),
           PrimaryButton(
             label: 'I’ve verified',
-            // Phase 2: reloads the user and re-checks emailVerified.
-            onPressed: () {},
+            loading: checking,
+            loadingLabel: 'Checking…',
+            onPressed: () => context.read<AuthBloc>().add(
+              const AuthVerificationCheckRequested(),
+            ),
           ),
           const SizedBox(height: 12),
           SecondaryButton(
-            label: cooldown == null
-                ? 'Resend email'
-                : 'Resend email in ${_formatSeconds(cooldown)}',
-            // Phase 2: resends the verification email.
-            onPressed: cooldown == null ? () {} : null,
+            label: resend.secondsLeft > 0
+                ? 'Resend email in ${_formatSeconds(resend.secondsLeft)}'
+                : resend.status == FormStatus.submitting
+                ? 'Sending…'
+                : 'Resend email',
+            onPressed: resend.canResend
+                ? context.read<VerifyEmailCubit>().resend
+                : null,
           ),
           const SizedBox(height: 8),
           AuthLinkRow(
             prompt: 'Wrong email?',
             linkLabel: 'Change it',
-            onPressed: () => Navigator.of(context).maybePop(),
+            onPressed: () =>
+                context.read<AuthBloc>().add(const AuthLogoutRequested()),
           ),
         ],
       ),

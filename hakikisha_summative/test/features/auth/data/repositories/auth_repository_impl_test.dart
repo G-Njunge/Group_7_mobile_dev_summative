@@ -137,6 +137,12 @@ void main() {
   });
 
   group('logIn', () {
+    setUp(
+      () =>
+          when(() => remote.linkPendingGoogle(any()))
+              .thenAnswer((_) async => false),
+    );
+
     test('returns the signed-in user', () async {
       when(
         () => remote.signIn(
@@ -155,6 +161,34 @@ void main() {
         () =>
             remote.signIn(email: 'amina.otieno@gmail.com', password: 'secret'),
       ).called(1);
+    });
+
+    test('links a Google account that was refused for this email', () async {
+      when(
+        () => remote.signIn(
+          email: any(named: 'email'),
+          password: any(named: 'password'),
+        ),
+      ).thenAnswer((_) async => user);
+
+      await repository.logIn(email: 'g.njunge@alustudent.com', password: 'pw');
+
+      verify(() => remote.linkPendingGoogle(user)).called(1);
+    });
+
+    test('still logs in if linking Google fails', () async {
+      when(
+        () => remote.signIn(
+          email: any(named: 'email'),
+          password: any(named: 'password'),
+        ),
+      ).thenAnswer((_) async => user);
+      when(() => remote.linkPendingGoogle(any()))
+          .thenThrow(FirebaseAuthException(code: 'credential-already-in-use'));
+
+      final result = await repository.logIn(email: 'a@b.com', password: 'pw');
+
+      expect(result.uid, 'uid-123');
     });
 
     test('maps invalid-credential to "Wrong email or password"', () async {

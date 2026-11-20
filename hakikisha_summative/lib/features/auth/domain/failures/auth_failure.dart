@@ -41,6 +41,16 @@ class AuthFailure extends Equatable implements Exception {
         'Choose a stronger password: at least 8 characters, '
         'with a letter and a number.',
     'operation-not-allowed': 'This sign-in method isn’t available right now.',
+    // Google sign-in.
+    'google-sign-in-failed': 'Google sign-in didn’t work. Please try again.',
+    'google-sign-in-not-configured':
+        'Google sign-in isn’t set up on this device yet. Use your email and '
+        'password for now.',
+    'popup-blocked':
+        'Your browser blocked the Google pop-up. Allow pop-ups and try again.',
+    'account-exists-with-different-credential':
+        'This email already has a Hakikisha password. Log in with it once '
+        'and we’ll connect your Google account.',
     // Shared.
     'too-many-requests':
         'Too many attempts. Wait a few minutes, then try '

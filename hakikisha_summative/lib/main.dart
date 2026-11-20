@@ -1,14 +1,29 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 
-import 'features/auth/presentation/pages/landing_page.dart';
+import 'features/auth/auth_injection.dart';
+import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'features/auth/presentation/pages/auth_gate.dart';
+import 'features/pharmacy/pharmacy_injection.dart';
 import 'firebase_options.dart';
 
-// get_it setup and go_router are added once M5's core lands.
+// go_router and the app-wide DI file are added once M5's core lands.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const HakikishaApp());
+  registerAuthDependencies(GetIt.instance);
+  registerPharmacyDependencies(GetIt.instance);
+
+  runApp(
+    // One AuthBloc for the whole app, so every screen sees the same session.
+    BlocProvider(
+      create: (_) =>
+          GetIt.instance<AuthBloc>()..add(const AuthSubscriptionRequested()),
+      child: const HakikishaApp(),
+    ),
+  );
 }
 
 class HakikishaApp extends StatelessWidget {
@@ -22,8 +37,8 @@ class HakikishaApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0F3D1E)),
       ),
-      // Temporary: the AuthGate (M1) / go_router (M5) picks the first screen later.
-      home: const LandingPage(),
+      // Temporary: M5's go_router takes over with the same auth redirect.
+      home: const AuthGate(),
     );
   }
 }
