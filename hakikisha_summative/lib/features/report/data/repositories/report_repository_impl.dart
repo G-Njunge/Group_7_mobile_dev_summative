@@ -1,3 +1,4 @@
+import '../../domain/entities/report_entity.dart';
 import '../../domain/repositories/report_repository.dart';
 import '../datasources/report_remote_data_source.dart';
 
@@ -5,6 +6,10 @@ class ReportRepositoryImpl implements ReportRepository {
   ReportRepositoryImpl(this._remoteDataSource);
 
   final ReportRemoteDataSource _remoteDataSource;
+
+  @override
+  Stream<List<ReportEntity>> watchMyReports(String userId) =>
+      _remoteDataSource.watchMyReports(userId);
 
   @override
   Future<void> createCounterfeitReport({
@@ -16,4 +21,19 @@ class ReportRepositoryImpl implements ReportRepository {
     pharmacyId: pharmacyId,
     description: description,
   );
+
+  @override
+  Future<void> updatePendingReport({
+    required String reportId,
+    required String pharmacyId,
+    required String description,
+  }) => _remoteDataSource.updatePendingReport(
+    reportId: reportId,
+    pharmacyId: pharmacyId,
+    description: description,
+  );
+
+  @override
+  Future<void> deletePendingReport(String reportId) =>
+      _remoteDataSource.deletePendingReport(reportId);
 }

@@ -7,6 +7,7 @@ import 'package:get_it/get_it.dart';
 import '../../../pharmacy/domain/entities/pharmacy_entity.dart';
 import '../bloc/report_cubit.dart';
 import '../bloc/report_state.dart';
+import 'my_reports_page.dart';
 
 class CounterfeitReportPage extends StatelessWidget {
   const CounterfeitReportPage({required this.userId, super.key});
@@ -35,100 +36,164 @@ class _CounterfeitReportViewState extends State<_CounterfeitReportView> {
   @override
   void initState() {
     super.initState();
-    unawaited(context.read<ReportCubit>().start());
+    unawaited(context.read<ReportCubit>().start(userId: widget.userId));
   }
 
   @override
-  Widget build(BuildContext context) => BlocConsumer<ReportCubit, ReportState>(
-    listenWhen: (previous, current) =>
-        previous.isSubmitted != current.isSubmitted,
-    listener: (context, state) {
-      if (state.isSubmitted) {
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-            const SnackBar(content: Text('Report submitted successfully.')),
-          );
-        Navigator.of(context).pop();
-      }
-    },
+  Widget build(BuildContext context) => BlocBuilder<ReportCubit, ReportState>(
     builder: (context, state) {
       final cubit = context.read<ReportCubit>();
       return Scaffold(
-        appBar: AppBar(title: const Text('Report suspected counterfeit')),
-        body: SafeArea(
-          child: Form(
-            key: _formKey,
-            child: ListView(
-              padding: const EdgeInsets.all(20),
-              children: [
-                Text(
-                  'Tell us what happened and where you encountered the medicine.',
-                  style: Theme.of(context).textTheme.bodyLarge,
+        appBar: AppBar(
+          title: const Text('Report suspected counterfeit'),
+          actions: [
+            IconButton(
+              tooltip: 'My reports',
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => MyReportsPage(userId: widget.userId),
                 ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  minLines: 4,
-                  maxLines: 7,
-                  maxLength: 2000,
-                  textCapitalization: TextCapitalization.sentences,
-                  decoration: const InputDecoration(
-                    labelText: 'Description',
-                    hintText: 'Describe the medicine and why you suspect it.',
-                    border: OutlineInputBorder(),
-                    alignLabelWithHint: true,
-                  ),
-                  onChanged: cubit.setDescription,
-                  validator: (value) => value == null || value.trim().isEmpty
-                      ? 'Enter a description.'
-                      : null,
-                ),
-                const SizedBox(height: 12),
-                _PharmacyPicker(state: state, onSelected: cubit.selectPharmacy),
-                if (state.pharmacyStatus == ReportPharmacyStatus.error) ...[
-                  const SizedBox(height: 8),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: TextButton.icon(
-                      onPressed: () => unawaited(cubit.start()),
-                      icon: const Icon(Icons.refresh),
-                      label: const Text('Retry loading pharmacies'),
-                    ),
-                  ),
-                ],
-                if (state.errorMessage != null) ...[
-                  const SizedBox(height: 12),
-                  Text(
-                    state.errorMessage!,
-                    style: TextStyle(color: Theme.of(context).colorScheme.error),
-                  ),
-                ],
-                const SizedBox(height: 24),
-                FilledButton.icon(
-                  onPressed: state.isSubmitting
-                      ? null
-                      : () {
-                          if (_formKey.currentState!.validate()) {
-                            unawaited(cubit.submit(userId: widget.userId));
-                          }
-                        },
-                  icon: state.isSubmitting
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.send_outlined),
-                  label: Text(
-                    state.isSubmitting ? 'Submitting…' : 'Submit report',
-                  ),
-                ),
-              ],
+              ),
+              icon: const Icon(Icons.receipt_long_outlined),
             ),
-          ),
+          ],
         ),
+        body: state.isSubmitted
+            ? _ReportSentView(userId: widget.userId)
+            : SafeArea(
+                child: Form(
+                  key: _formKey,
+                  child: ListView(
+                    padding: const EdgeInsets.all(20),
+                    children: [
+                      Text(
+                        'Tell us what happened and where you encountered the medicine.',
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                      const SizedBox(height: 20),
+                      TextFormField(
+                        minLines: 4,
+                        maxLines: 7,
+                        maxLength: 2000,
+                        textCapitalization: TextCapitalization.sentences,
+                        decoration: const InputDecoration(
+                          labelText: 'Description',
+                          hintText:
+                              'Describe the medicine and why you suspect it.',
+                          border: OutlineInputBorder(),
+                          alignLabelWithHint: true,
+                        ),
+                        onChanged: cubit.setDescription,
+                        validator: (value) =>
+                            value == null || value.trim().isEmpty
+                            ? 'Enter a description.'
+                            : null,
+                      ),
+                      const SizedBox(height: 12),
+                      _PharmacyPicker(
+                        state: state,
+                        onSelected: cubit.selectPharmacy,
+                      ),
+                      if (state.pharmacyStatus ==
+                          ReportPharmacyStatus.error) ...[
+                        const SizedBox(height: 8),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: TextButton.icon(
+                            onPressed: () =>
+                                unawaited(cubit.start(userId: widget.userId)),
+                            icon: const Icon(Icons.refresh),
+                            label: const Text('Retry loading pharmacies'),
+                          ),
+                        ),
+                      ],
+                      if (state.errorMessage != null) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                          state.errorMessage!,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 24),
+                      FilledButton.icon(
+                        onPressed: state.isSubmitting
+                            ? null
+                            : () {
+                                if (_formKey.currentState!.validate()) {
+                                  unawaited(
+                                    cubit.submit(userId: widget.userId),
+                                  );
+                                }
+                              },
+                        icon: state.isSubmitting
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.send_outlined),
+                        label: Text(
+                          state.isSubmitting ? 'Submitting…' : 'Submit report',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
       );
     },
+  );
+}
+
+class _ReportSentView extends StatelessWidget {
+  const _ReportSentView({required this.userId});
+
+  final String userId;
+
+  @override
+  Widget build(BuildContext context) => SafeArea(
+    child: Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.check_circle_outline,
+              size: 72,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Report sent',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Thank you. Your report has been sent to the Pharmacy and Poisons Board.',
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Done'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => MyReportsPage(userId: userId),
+                ),
+              ),
+              child: const Text('View my reports'),
+            ),
+          ],
+        ),
+      ),
+    ),
   );
 }
 
@@ -143,7 +208,7 @@ class _PharmacyPicker extends StatelessWidget {
     final isLoading = state.pharmacyStatus == ReportPharmacyStatus.loading;
     final pharmacies = state.pharmacies;
     return DropdownButtonFormField<String>(
-      value: state.selectedPharmacyId,
+      initialValue: state.selectedPharmacyId,
       decoration: InputDecoration(
         labelText: 'Pharmacy',
         border: const OutlineInputBorder(),
@@ -184,17 +249,9 @@ class _PharmacyOption extends StatelessWidget {
   final PharmacyEntity pharmacy;
 
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Text(pharmacy.name, maxLines: 1, overflow: TextOverflow.ellipsis),
-      Text(
-        pharmacy.address,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: Theme.of(context).textTheme.bodySmall,
-      ),
-    ],
+  Widget build(BuildContext context) => Text(
+    '${pharmacy.name} · ${pharmacy.address}',
+    maxLines: 1,
+    overflow: TextOverflow.ellipsis,
   );
 }
