@@ -4,7 +4,9 @@ import 'dart:math' as math;
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter/services.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../domain/entities/pharmacy_coordinates.dart';
 import '../../domain/entities/pharmacy_entity.dart';
@@ -268,10 +270,66 @@ class _PharmacyMapViewState extends State<_PharmacyMapView> {
             Text(pharmacy.verified ? 'Verified pharmacy' : 'Not verified'),
             if (pharmacy.phone.trim().isNotEmpty)
               Text('Phone: ${pharmacy.phone}'),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 12,
+              runSpacing: 8,
+              children: [
+                FilledButton.icon(
+                  onPressed: () => unawaited(
+                    _launchExternalUrl(
+                      context,
+                      Uri.https('www.google.com', '/maps/dir/', {
+                        'api': '1',
+                        'destination':
+                            '${pharmacy.latitude},${pharmacy.longitude}',
+                      }),
+                      'Could not open directions.',
+                    ),
+                  ),
+                  icon: const Icon(Icons.directions),
+                  label: const Text('Directions'),
+                ),
+                if (pharmacy.phone.trim().isNotEmpty)
+                  OutlinedButton.icon(
+                    onPressed: () => unawaited(
+                      _launchExternalUrl(
+                        context,
+                        Uri(scheme: 'tel', path: pharmacy.phone.trim()),
+                        'Could not open the phone app.',
+                      ),
+                    ),
+                    icon: const Icon(Icons.call_outlined),
+                    label: const Text('Call'),
+                  ),
+              ],
+            ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _launchExternalUrl(
+    BuildContext context,
+    Uri uri,
+    String errorMessage,
+  ) async {
+    try {
+      final launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!launched && context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(errorMessage)));
+      }
+    } on PlatformException {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(errorMessage)));
+      }
+    }
   }
 }
 
