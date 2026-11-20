@@ -11,6 +11,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../auth/presentation/widgets/auth_colors.dart';
 import '../../../auth/presentation/widgets/neumorphic.dart';
+import '../../../../core/widgets/app_drawer.dart';
 import '../../domain/entities/pharmacy_coordinates.dart';
 import '../../domain/entities/pharmacy_entity.dart';
 import '../../domain/utils/pharmacy_search.dart';
@@ -77,6 +78,7 @@ class _PharmacyMapViewState extends State<_PharmacyMapView> {
       _lastCurrentLocation = state.currentLocation;
     },
     builder: (context, state) => Scaffold(
+      drawer: const AppDrawer(),
       appBar: AppBar(
         title: const Text('Pharmacy map'),
         backgroundColor: AuthColors.surface,

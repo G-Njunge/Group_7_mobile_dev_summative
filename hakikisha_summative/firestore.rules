@@ -1,57 +1,120 @@
 rules_version = '2';
 
-// TEMPORARY rules so auth can be developed. M5 replaces these with the full
-// rules for every collection (see the Firestore contract in README.md).
+// Hakikisha Firestore security rules.
+//
+// Deny by default: anything not matched below is locked.
+// Personal data is readable and writable only by its owner.
+// Reference data is read-only for signed-in users.
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Owner-only access to your own profile doc (doc ID = Firebase Auth uid).
-    match /users/{uid} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
+    function signedIn() {
+      return request.auth != null;
     }
 
-    // Pharmacy map (M4). Contract: signed-in read, no client write.
-    match /pharmacies/{pharmacyId} {
-      allow read: if request.auth != null;
+    function isUser(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function data() {
+      return request.resource.data;
+    }
+
+    function hasShape(required, optional) {
+      return data().keys().hasAll(required)
+        && data().keys().hasOnly(required.concat(optional));
+    }
+
+    function unchanged(keys) {
+      return !data().diff(resource.data).affectedKeys().hasAny(keys);
+    }
+
+    function isText(value, min, max) {
+      return value is string && value.size() >= min && value.size() <= max;
+    }
+
+    function isOptionalText(value, max) {
+      return value == null || isText(value, 0, max);
+    }
+
+    function isNow(value) {
+      return value == request.time;
+    }
+
+    match /users/{uid} {
+      function validUser() {
+        return hasShape(
+            ['uid', 'fullName', 'email', 'authProvider', 'createdAt'],
+            ['phone', 'photoUrl'])
+          && data().uid == uid
+          && isText(data().fullName, 1, 100)
+          && isText(data().email, 3, 254)
+          && data().authProvider in ['password', 'google']
+          && isOptionalText(data().get('phone', null), 20)
+          && isOptionalText(data().get('photoUrl', null), 2048);
+      }
+
+      allow read, delete: if isUser(uid);
+      allow create: if isUser(uid) && validUser() && isNow(data().createdAt);
+      allow update: if isUser(uid)
+        && validUser()
+        && unchanged(['uid', 'email', 'authProvider', 'createdAt']);
+    }
+
+    match /medicines/{medicineId} {
+      allow read: if signedIn();
       allow write: if false;
     }
 
-    // Users may create their own counterfeit reports from the app.
-    match /reports/{reportId} {
-      allow read: if request.auth != null
-        && resource.data.userId == request.auth.uid;
-
-      allow create: if request.auth != null
-        && request.resource.data.userId == request.auth.uid
-        && request.resource.data.status == 'pending'
-        && request.resource.data.description is string
-        && request.resource.data.description.size() > 0
-        && request.resource.data.description.size() <= 2000
-        && request.resource.data.description.matches('.*\\S.*')
-        && request.resource.data.pharmacyId is string
-        && request.resource.data.pharmacyId.size() > 0;
-
-      allow update: if request.auth != null
-        && resource.data.userId == request.auth.uid
-        && resource.data.status == 'pending'
-        && request.resource.data.userId == resource.data.userId
-        && request.resource.data.status == resource.data.status
-        && request.resource.data.description is string
-        && request.resource.data.description.size() > 0
-        && request.resource.data.description.size() <= 2000
-        && request.resource.data.description.matches('.*\\S.*')
-        && request.resource.data.pharmacyId is string
-        && request.resource.data.pharmacyId.size() > 0
-        && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['description', 'pharmacyId', 'updatedAt']);
-
-      allow delete: if request.auth != null
-        && resource.data.userId == request.auth.uid
-        && resource.data.status == 'pending';
+    match /batches/{batchId} {
+      allow read: if signedIn();
+      allow write: if false;
     }
 
-    // Everything else stays locked until M5's rules land.
-    match /{document=**} {
-      allow read, write: if false;
+    match /pharmacies/{pharmacyId} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
+    match /scans/{scanId} {
+      allow read, delete: if isUser(resource.data.userId);
+      allow create: if isUser(data().userId)
+        && hasShape(['userId', 'result', 'method', 'scannedAt'], ['scanId', 'batchId'])
+        && data().get('scanId', scanId) == scanId
+        && isOptionalText(data().get('batchId', null), 128)
+        && data().result in ['genuine', 'flagged', 'notFound']
+        && data().method in ['camera', 'manual', 'upload']
+        && isNow(data().scannedAt);
+      allow update: if false;
+    }
+
+    match /reports/{reportId} {
+      function validReport() {
+        return hasShape(
+            ['userId', 'description', 'photoUrls', 'status', 'createdAt', 'updatedAt'],
+            ['reportId', 'scanId', 'pharmacyId'])
+          && data().get('reportId', reportId) == reportId
+          && isText(data().description, 1, 2000)
+          && data().photoUrls is list
+          && data().photoUrls.size() <= 3
+          && isOptionalText(data().get('scanId', null), 128)
+          && isOptionalText(data().get('pharmacyId', null), 128)
+          && data().status == 'pending'
+          && isNow(data().updatedAt);
+      }
+
+      function isPending() {
+        return resource.data.status == 'pending';
+      }
+
+      allow read: if isUser(resource.data.userId);
+      allow create: if isUser(data().userId)
+        && validReport()
+        && isNow(data().createdAt);
+      allow update: if isUser(resource.data.userId)
+        && isPending()
+        && validReport()
+        && unchanged(['userId', 'createdAt']);
+      allow delete: if isUser(resource.data.userId) && isPending();
     }
   }
 }
