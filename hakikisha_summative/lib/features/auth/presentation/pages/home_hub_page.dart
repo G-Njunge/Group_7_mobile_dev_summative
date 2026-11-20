@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 
 import '../../../pharmacy/presentation/bloc/pharmacy_map_cubit.dart';
 import '../../../pharmacy/presentation/pages/pharmacy_map_page.dart';
+import '../../../report/presentation/pages/counterfeit_report_page.dart';
 import '../bloc/auth_bloc.dart';
 import '../widgets/auth_buttons.dart';
 import '../widgets/auth_colors.dart';
@@ -40,6 +41,14 @@ class HomeHubPage extends StatelessWidget {
     );
   }
 
+  void _openCounterfeitReport(BuildContext context, String userId) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => CounterfeitReportPage(userId: userId),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = context.select((AuthBloc bloc) => bloc.state.user);
@@ -62,10 +71,13 @@ class HomeHubPage extends StatelessWidget {
         title: 'Scan history',
         subtitle: 'Your past checks',
       ),
-      const _Feature(
+      _Feature(
         icon: Icons.report_outlined,
-        title: 'Report a medicine',
+        title: 'Report counterfeit medicine',
         subtitle: 'Tell the Pharmacy and Poisons Board',
+        onTap: user == null
+            ? null
+            : () => _openCounterfeitReport(context, user.uid),
       ),
       const _Feature(
         icon: Icons.person_outline,

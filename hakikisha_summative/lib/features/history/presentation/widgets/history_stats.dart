@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../bloc/history_state.dart';
 import 'scan_tile.dart';

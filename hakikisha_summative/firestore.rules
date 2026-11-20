@@ -15,6 +15,18 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Users may create their own counterfeit reports from the app.
+    match /reports/{reportId} {
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == 'pending'
+        && request.resource.data.description is string
+        && request.resource.data.description.size() > 0
+        && request.resource.data.description.size() <= 2000
+        && request.resource.data.pharmacyId is string
+        && request.resource.data.pharmacyId.size() > 0;
+    }
+
     // Everything else stays locked until M5's rules land.
     match /{document=**} {
       allow read, write: if false;
