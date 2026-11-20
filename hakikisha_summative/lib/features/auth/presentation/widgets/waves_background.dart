@@ -1,4 +1,5 @@
-import 'package:material_ui/material_ui.dart';
+// ignore: deprecated_member_use
+import 'package:flutter/material.dart';
 
 /// Full-screen wavy white background used on the Landing screen.
 /// Put the screen content in [child].

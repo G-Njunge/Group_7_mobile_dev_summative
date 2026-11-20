@@ -1,4 +1,5 @@
-import 'package:material_ui/material_ui.dart';
+// ignore: deprecated_member_use
+import 'package:flutter/material.dart';
 
 import '../../domain/entities/scan_summary.dart';
 import '../utils/scan_date_format.dart';
