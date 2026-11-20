@@ -61,6 +61,22 @@ void main() {
       await source.signOut();
       verify(auth.signOut).called(1);
     });
+
+    test(
+      'a custom signOut (e.g. Firebase + Google) replaces the default',
+      () async {
+        final auth = _MockAuth();
+        var customCalls = 0;
+        final source = FirebaseSessionSource(
+          auth,
+          signOut: () async => customCalls++,
+        );
+
+        await source.signOut();
+        expect(customCalls, 1);
+        verifyNever(auth.signOut);
+      },
+    );
   });
 
   group('SessionCubit', () {

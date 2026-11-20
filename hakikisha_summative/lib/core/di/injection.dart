@@ -5,6 +5,7 @@ import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../features/auth/auth_injection.dart';
+import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/pharmacy/pharmacy_injection.dart';
 import '../../features/settings/settings_injection.dart';
 import '../session/session_cubit.dart';
@@ -31,7 +32,13 @@ Future<void> configureDependencies() async {
     ..registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance)
     ..registerLazySingleton<FirebaseFirestore>(() => FirebaseFirestore.instance)
     ..registerLazySingleton<FirebaseStorage>(() => FirebaseStorage.instance)
-    ..registerLazySingleton<SessionSource>(() => FirebaseSessionSource(sl()))
+    // Signing out goes through the auth feature so Google is signed out too.
+    ..registerLazySingleton<SessionSource>(
+      () => FirebaseSessionSource(
+        sl(),
+        signOut: () => sl<AuthRepository>().logOut(),
+      ),
+    )
     ..registerFactory(() => SessionCubit(sl()));
 
   registerAuthDependencies(sl);

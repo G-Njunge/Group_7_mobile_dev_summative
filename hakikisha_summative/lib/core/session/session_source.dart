@@ -24,9 +24,13 @@ abstract interface class SessionSource {
 }
 
 class FirebaseSessionSource implements SessionSource {
-  FirebaseSessionSource(this._auth);
+  /// [signOut] replaces the plain Firebase sign-out. The DI setup passes the
+  /// auth feature's `logOut`, which also signs out of Google so the account
+  /// picker shows again on the next Google sign-in.
+  FirebaseSessionSource(this._auth, {this._signOut});
 
   final FirebaseAuth _auth;
+  final Future<void> Function()? _signOut;
 
   // userChanges (not authStateChanges) also fires when the user is reloaded,
   // which is how a freshly verified email is picked up.
@@ -37,7 +41,7 @@ class FirebaseSessionSource implements SessionSource {
   SessionStatus get current => statusOf(_auth.currentUser);
 
   @override
-  Future<void> signOut() => _auth.signOut();
+  Future<void> signOut() => (_signOut ?? _auth.signOut)();
 
   /// Google accounts arrive verified, so only unverified email/password
   /// accounts land on [SessionStatus.unverified].
