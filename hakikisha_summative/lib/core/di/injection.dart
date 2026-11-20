@@ -4,6 +4,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../features/auth/auth_injection.dart';
+import '../../features/pharmacy/pharmacy_injection.dart';
 import '../../features/settings/settings_injection.dart';
 import '../session/session_cubit.dart';
 import '../session/session_source.dart';
@@ -32,5 +34,7 @@ Future<void> configureDependencies() async {
     ..registerLazySingleton<SessionSource>(() => FirebaseSessionSource(sl()))
     ..registerFactory(() => SessionCubit(sl()));
 
+  registerAuthDependencies(sl);
+  registerPharmacyDependencies(sl);
   registerSettingsDependencies(sl);
 }
