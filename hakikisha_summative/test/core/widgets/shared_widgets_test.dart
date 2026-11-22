@@ -1,4 +1,4 @@
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hakikisha_summative/core/widgets/app_buttons.dart';
 import 'package:hakikisha_summative/core/widgets/app_scaffold.dart';

@@ -50,26 +50,27 @@ class ReportCubit extends Cubit<ReportState> {
         ),
       ),
     );
-    _reportsSubscription = _reportRepository.watchMyReports(userId).listen(
-      (reports) => emit(
-        state.copyWith(
-          reportsStatus: MyReportsStatus.loaded,
-          reports: reports,
-          clearErrorMessage: true,
-        ),
-      ),
-      onError: (Object _) => emit(
-        state.copyWith(
-          reportsStatus: MyReportsStatus.error,
-          errorMessage: 'Could not load your reports. Please try again.',
-        ),
-      ),
-    );
+    _reportsSubscription = _reportRepository
+        .watchMyReports(userId)
+        .listen(
+          (reports) => emit(
+            state.copyWith(
+              reportsStatus: MyReportsStatus.loaded,
+              reports: reports,
+              clearErrorMessage: true,
+            ),
+          ),
+          onError: (Object _) => emit(
+            state.copyWith(
+              reportsStatus: MyReportsStatus.error,
+              errorMessage: 'Could not load your reports. Please try again.',
+            ),
+          ),
+        );
   }
 
-  void setDescription(String description) => emit(
-    state.copyWith(description: description, clearErrorMessage: true),
-  );
+  void setDescription(String description) =>
+      emit(state.copyWith(description: description, clearErrorMessage: true));
 
   void selectPharmacy(String? pharmacyId) => emit(
     state.copyWith(
@@ -138,7 +139,9 @@ class ReportCubit extends Cubit<ReportState> {
       );
       return false;
     }
-    if (!state.pharmacies.any((pharmacy) => pharmacy.pharmacyId == pharmacyId)) {
+    if (!state.pharmacies.any(
+      (pharmacy) => pharmacy.pharmacyId == pharmacyId,
+    )) {
       emit(
         state.copyWith(
           actionErrorMessage: 'Select a pharmacy.',
@@ -189,7 +192,8 @@ class ReportCubit extends Cubit<ReportState> {
       emit(
         state.copyWith(
           clearActionReportId: true,
-          actionErrorMessage: 'Could not withdraw the report. Please try again.',
+          actionErrorMessage:
+              'Could not withdraw the report. Please try again.',
         ),
       );
       return false;
