@@ -48,3 +48,11 @@ app.*.map.json
 .widget_preview/
 
 
+
+# Backend (rules tests, seed script)
+backend/node_modules/
+*-debug.log
+service-account*.json
+
+# Flutter test coverage output
+coverage/

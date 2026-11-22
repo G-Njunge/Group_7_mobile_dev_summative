@@ -2,13 +2,13 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../domain/entities/scan_entity.dart';
+import '../../domain/entities/scan_summary.dart';
 import '../../domain/repositories/history_repository.dart';
 import 'history_state.dart';
 
 class HistoryCubit extends Cubit<HistoryState> {
   final HistoryRepository _repository;
-  StreamSubscription<List<ScanEntity>>? _subscription;
+  StreamSubscription<List<ScanSummary>>? _subscription;
 
   HistoryCubit(this._repository) : super(const HistoryState());
 
