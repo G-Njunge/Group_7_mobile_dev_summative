@@ -11,6 +11,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../auth/presentation/widgets/auth_colors.dart';
 import '../../../auth/presentation/widgets/neumorphic.dart';
+import '../../../../core/widgets/app_drawer.dart';
 import '../../domain/entities/pharmacy_coordinates.dart';
 import '../../domain/entities/pharmacy_entity.dart';
 import '../../domain/utils/pharmacy_search.dart';
@@ -82,6 +83,7 @@ class _PharmacyMapViewState extends State<_PharmacyMapView> {
         backgroundColor: AuthColors.surface,
         surfaceTintColor: Colors.transparent,
       ),
+      drawer: const AppDrawer(),
       body: ColoredBox(
         color: AuthColors.surface,
         child: SafeArea(
