@@ -34,9 +34,8 @@ void main() {
   setUp(() {
     repository = MockAuthRepository();
     authChanges = StreamController<AppUser?>.broadcast();
-    when(
-      () => repository.authStateChanges(),
-    ).thenAnswer((_) => authChanges.stream);
+    when(() => repository.authStateChanges())
+        .thenAnswer((_) => authChanges.stream);
     GetIt.instance.registerSingleton<AuthRepository>(repository);
     registerAuthPresentation(GetIt.instance);
   });

@@ -23,20 +23,18 @@ class PharmacyEntity extends Equatable {
   final String phone;
   final bool verified;
 
-  PharmacyCoordinates get coordinates => PharmacyCoordinates(
-        latitude: latitude,
-        longitude: longitude,
-      );
+  PharmacyCoordinates get coordinates =>
+      PharmacyCoordinates(latitude: latitude, longitude: longitude);
 
   @override
   List<Object> get props => [
-        pharmacyId,
-        name,
-        licenseNo,
-        address,
-        latitude,
-        longitude,
-        phone,
-        verified,
-      ];
+    pharmacyId,
+    name,
+    licenseNo,
+    address,
+    latitude,
+    longitude,
+    phone,
+    verified,
+  ];
 }
