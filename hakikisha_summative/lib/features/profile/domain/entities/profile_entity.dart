@@ -7,7 +7,7 @@ class ProfileEntity extends Equatable {
   final String? phone;
   final String authProvider;
   final String? photoUrl;
-  final DateTime createdAt;
+  final DateTime? createdAt;
 
   const ProfileEntity({
     required this.uid,
@@ -16,7 +16,7 @@ class ProfileEntity extends Equatable {
     this.phone,
     required this.authProvider,
     this.photoUrl,
-    required this.createdAt,
+    this.createdAt,
   });
 
   @override

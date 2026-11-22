@@ -1,0 +1,37 @@
+rules_version = '2';
+
+// Hakikisha Cloud Storage rules.
+//
+// Paths (the contract for M3 and M4):
+//   users/{uid}/avatar/{file}                profile photo
+//   reports/{uid}/{reportId}/{file}          up to 3 report photos
+//
+// Each user can only read and write files under their own uid, and uploads
+// must be images under 5 MB.
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isUser(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    function isSmallImage() {
+      return request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
+    match /users/{uid}/avatar/{file} {
+      allow read, delete: if isUser(uid);
+      allow create, update: if isUser(uid) && isSmallImage();
+    }
+
+    match /reports/{uid}/{reportId}/{file} {
+      allow read, delete: if isUser(uid);
+      allow create, update: if isUser(uid) && isSmallImage();
+    }
+
+    // Everything else is locked.
+    match /{path=**} {
+      allow read, write: if false;
+    }
+  }
+}

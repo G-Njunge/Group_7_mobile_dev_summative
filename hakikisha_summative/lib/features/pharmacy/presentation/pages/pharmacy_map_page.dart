@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../../../core/widgets/app_drawer.dart';
 import '../../domain/entities/pharmacy_coordinates.dart';
 import '../../domain/entities/pharmacy_entity.dart';
 import '../../domain/utils/pharmacy_search.dart';
@@ -73,6 +74,9 @@ class _PharmacyMapViewState extends State<_PharmacyMapView> {
     },
     builder: (context, state) => Scaffold(
       appBar: AppBar(title: const Text('Pharmacy map')),
+      // Reached from the drawer as a top-level route, so it needs the drawer
+      // to navigate away (the AppBar shows the menu button for it).
+      drawer: const AppDrawer(),
       body: LayoutBuilder(
         builder: (context, constraints) => Column(
           children: [
