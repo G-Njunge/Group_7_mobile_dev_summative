@@ -29,5 +29,17 @@
   "saveHistory": "Save scan history",
   "saveHistoryHint": "When off, new scans are not added to your history",
   "settingsSaveError": "We couldn't save that setting. Please try again.",
-  "placeholderBody": "This screen is being built."
+  "placeholderBody": "This screen is being built.",
+  "profileLoadError": "We couldn't load your profile. Please try again.",
+  "profilePhone": "Phone",
+  "profileNotSet": "Not set",
+  "profileSignedInWith": "Signed in with",
+  "profileSignInGoogle": "Google",
+  "profileSignInPassword": "Email and password",
+  "profileEdit": "Edit profile",
+  "profileSaved": "Profile updated.",
+  "profileSaveError": "We couldn't save your changes. Please try again.",
+  "profileFullName": "Full name",
+  "profileEmail": "Email",
+  "profileSaveChanges": "Save changes"
 }

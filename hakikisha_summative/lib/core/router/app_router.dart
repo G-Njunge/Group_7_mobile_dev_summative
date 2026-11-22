@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -13,6 +14,8 @@ import '../../features/auth/presentation/pages/verify_email_page.dart';
 import '../../features/pharmacy/presentation/bloc/pharmacy_map_cubit.dart';
 import '../../features/pharmacy/presentation/pages/pharmacy_map_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
+import '../../features/profile/presentation/bloc/profile_cubit.dart';
+import '../../features/profile/presentation/pages/profile_page.dart';
 import '../di/injection.dart';
 import '../session/session_cubit.dart';
 import 'app_routes.dart';
@@ -52,8 +55,16 @@ GoRouter createAppRouter(SessionCubit session) => GoRouter(
     _placeholder(AppRoutes.home, 'Home'),
     // M3: history & profile
     _placeholder(AppRoutes.history, 'Scan history'),
-    _placeholder(AppRoutes.profile, 'Profile'),
-    // M4: pharmacy map & reporting
+    GoRoute(
+      path: AppRoutes.profile,
+      // BlocProvider owns the cubit, so it is closed when the page is left.
+      // The router only shows this to signed-in users, so currentUser is set.
+      builder: (_, _) => BlocProvider(
+        create: (_) =>
+            sl<ProfileCubit>()..start(sl<FirebaseAuth>().currentUser!.uid),
+        child: const ProfilePage(),
+      ),
+    ), // M4: pharmacy map & reporting
     GoRoute(
       path: AppRoutes.pharmacies,
       // BlocProvider owns the cubit, so it's closed when the map is left.

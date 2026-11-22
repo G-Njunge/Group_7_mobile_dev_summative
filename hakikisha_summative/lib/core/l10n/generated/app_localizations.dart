@@ -277,6 +277,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This screen is being built.'**
   String get placeholderBody;
+
+  /// No description provided for @profileLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load your profile. Please try again.'**
+  String get profileLoadError;
+
+  /// No description provided for @profilePhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get profilePhone;
+
+  /// No description provided for @profileNotSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get profileNotSet;
+
+  /// No description provided for @profileSignedInWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in with'**
+  String get profileSignedInWith;
+
+  /// No description provided for @profileSignInGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Google'**
+  String get profileSignInGoogle;
+
+  /// No description provided for @profileSignInPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Email and password'**
+  String get profileSignInPassword;
+
+  /// No description provided for @profileEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit profile'**
+  String get profileEdit;
+
+  /// No description provided for @profileSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile updated.'**
+  String get profileSaved;
+
+  /// No description provided for @profileSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t save your changes. Please try again.'**
+  String get profileSaveError;
+
+  /// No description provided for @profileFullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Full name'**
+  String get profileFullName;
+
+  /// No description provided for @profileEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get profileEmail;
+
+  /// No description provided for @profileSaveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes'**
+  String get profileSaveChanges;
 }
 
 class _AppLocalizationsDelegate

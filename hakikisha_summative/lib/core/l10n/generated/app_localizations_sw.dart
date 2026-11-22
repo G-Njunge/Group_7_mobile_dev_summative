@@ -101,4 +101,42 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get placeholderBody => 'Skrini hii inajengwa.';
+
+  @override
+  String get profileLoadError =>
+      'Hatukuweza kupakia wasifu wako. Tafadhali jaribu tena.';
+
+  @override
+  String get profilePhone => 'Simu';
+
+  @override
+  String get profileNotSet => 'Haijawekwa';
+
+  @override
+  String get profileSignedInWith => 'Umeingia kwa';
+
+  @override
+  String get profileSignInGoogle => 'Google';
+
+  @override
+  String get profileSignInPassword => 'Barua pepe na nenosiri';
+
+  @override
+  String get profileEdit => 'Hariri wasifu';
+
+  @override
+  String get profileSaved => 'Wasifu umesasishwa.';
+
+  @override
+  String get profileSaveError =>
+      'Hatukuweza kuhifadhi mabadiliko yako. Tafadhali jaribu tena.';
+
+  @override
+  String get profileFullName => 'Jina kamili';
+
+  @override
+  String get profileEmail => 'Barua pepe';
+
+  @override
+  String get profileSaveChanges => 'Hifadhi mabadiliko';
 }

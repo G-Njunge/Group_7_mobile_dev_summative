@@ -29,5 +29,17 @@
   "saveHistory": "Hifadhi historia ya ukaguzi",
   "saveHistoryHint": "Ikizimwa, ukaguzi mpya hauongezwi kwenye historia yako",
   "settingsSaveError": "Hatukuweza kuhifadhi mpangilio huo. Tafadhali jaribu tena.",
-  "placeholderBody": "Skrini hii inajengwa."
+  "placeholderBody": "Skrini hii inajengwa.",
+  "profileLoadError": "Hatukuweza kupakia wasifu wako. Tafadhali jaribu tena.",
+  "profilePhone": "Simu",
+  "profileNotSet": "Haijawekwa",
+  "profileSignedInWith": "Umeingia kwa",
+  "profileSignInGoogle": "Google",
+  "profileSignInPassword": "Barua pepe na nenosiri",
+  "profileEdit": "Hariri wasifu",
+  "profileSaved": "Wasifu umesasishwa.",
+  "profileSaveError": "Hatukuweza kuhifadhi mabadiliko yako. Tafadhali jaribu tena.",
+  "profileFullName": "Jina kamili",
+  "profileEmail": "Barua pepe",
+  "profileSaveChanges": "Hifadhi mabadiliko"
 }
