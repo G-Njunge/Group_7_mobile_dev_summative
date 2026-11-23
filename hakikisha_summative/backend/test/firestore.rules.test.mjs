@@ -49,7 +49,7 @@ const newUser = (uid, overrides = {}) => ({
   uid,
   fullName: 'Amina Wanjiru',
   email: `${uid}@example.com`,
-  phone: '+254700000000',
+  phone: '+250788000000',
   authProvider: 'password',
   photoUrl: null,
   createdAt: serverTimestamp(),
@@ -68,7 +68,7 @@ const newScan = (userId, overrides = {}) => ({
 const newReport = (userId, overrides = {}) => ({
   userId,
   scanId: null,
-  pharmacyId: 'ph_goodlife_westlands',
+  pharmacyId: 'ph_kigali_central',
   description: 'Seal was broken and the colour looked wrong.',
   photoUrls: [],
   status: 'pending',

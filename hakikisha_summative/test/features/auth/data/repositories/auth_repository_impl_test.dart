@@ -38,7 +38,7 @@ void main() {
   Future<AppUser> signUp() => repository.signUp(
     fullName: '  Amina Otieno ',
     email: ' amina.otieno@gmail.com ',
-    phone: '0712 345 678',
+    phone: '0788 123 456',
     password: 'hakikisha2026',
   );
 
@@ -77,7 +77,7 @@ void main() {
         expect(saved.uid, 'uid-123');
         expect(saved.fullName, 'Amina Otieno');
         expect(saved.email, 'amina.otieno@gmail.com');
-        expect(saved.phone, '+254712345678');
+        expect(saved.phone, '+250788123456');
         expect(saved.authProvider, 'password');
       },
     );

@@ -281,7 +281,7 @@ class _PharmacyMapViewState extends State<_PharmacyMapView> {
   Widget _buildMap(PharmacyMapState state) => FlutterMap(
     mapController: _mapController,
     options: const MapOptions(
-      initialCenter: LatLng(-1.286389, 36.817223),
+      initialCenter: LatLng(-1.9441, 30.0619),
       initialZoom: 11,
     ),
     children: [
