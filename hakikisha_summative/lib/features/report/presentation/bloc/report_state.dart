@@ -1,6 +1,6 @@
-import 'package:equatable/equatable.dart';
-
 import 'dart:typed_data';
+
+import 'package:equatable/equatable.dart';
 
 import '../../../pharmacy/domain/entities/pharmacy_entity.dart';
 import '../../domain/entities/report_entity.dart';
