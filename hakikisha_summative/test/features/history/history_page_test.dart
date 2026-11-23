@@ -9,6 +9,8 @@ import 'package:hakikisha_summative/features/history/domain/repositories/history
 import 'package:hakikisha_summative/features/history/presentation/bloc/history_cubit.dart';
 import 'package:hakikisha_summative/features/history/presentation/pages/history_page.dart';
 
+import '../../helpers/pump_app.dart';
+
 /// A stand-in repository: the test decides when and what it "sends".
 class _FakeRepo implements HistoryRepository {
   final controller = StreamController<List<ScanSummary>>();
@@ -36,13 +38,14 @@ Future<_FakeRepo> _pumpPage(WidgetTester tester) async {
   final repo = _FakeRepo();
   addTearDown(repo.controller.close);
 
-  await tester.pumpWidget(
-    MaterialApp(
-      home: BlocProvider(
+  await tester.pumpPage(
+    const HistoryPage(),
+    providers: [
+      BlocProvider<HistoryCubit>(
         create: (_) => HistoryCubit(repo)..start('u1'),
-        child: const HistoryPage(),
       ),
-    ),
+    ],
+    settle: false,
   );
   return repo;
 }

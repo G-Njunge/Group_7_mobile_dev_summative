@@ -123,6 +123,14 @@ void main() {
     expect(find.text('Mandhari'), findsOneWidget);
   });
 
+  testWidgets('renders in Kinyarwanda', (tester) async {
+    await pumpSettings(tester, locale: const Locale('rw'));
+
+    expect(find.text('Amagenamiterere'), findsOneWidget);
+    expect(find.text('IMITERERE'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('fits a small phone in landscape without overflow', (
     tester,
   ) async {

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hakikisha_summative/core/l10n/app_localization_delegates.dart';
 import 'package:hakikisha_summative/core/l10n/generated/app_localizations.dart';
 import 'package:hakikisha_summative/core/session/session_cubit.dart';
 import 'package:hakikisha_summative/core/session/session_source.dart';
@@ -71,7 +72,8 @@ extension PumpApp on WidgetTester {
         child: MaterialApp.router(
           theme: AppTheme.light,
           locale: locale,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          localizationsDelegates:
+              AppLocalizationDelegates.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           routerConfig: router,
         ),

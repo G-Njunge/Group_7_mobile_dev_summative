@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import 'core/l10n/app_localization_delegates.dart';
 import 'core/l10n/generated/app_localizations.dart';
 import 'core/session/session_cubit.dart';
 import 'core/theme/app_theme.dart';
@@ -43,7 +44,8 @@ class HakikishaApp extends StatelessWidget {
           // ThemePreference mirrors ThemeMode's names one-to-one.
           themeMode: ThemeMode.values.byName(state.settings.theme.name),
           locale: Locale(state.settings.language.code),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          localizationsDelegates:
+              AppLocalizationDelegates.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           routerConfig: router,
         ),
