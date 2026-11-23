@@ -255,4 +255,29 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Mipangilio'), findsOneWidget);
   });
+
+  testWidgets('the app runs in Kinyarwanda, including built-in widgets', (
+    tester,
+  ) async {
+    // Flutter has no built-in Kinyarwanda strings, so the drawer and dialog
+    // below only work thanks to the English fallback delegates.
+    await launch(
+      tester,
+      savedPrefs: {
+        SettingsRepositoryImpl.languageKey: AppLanguage.kinyarwanda.name,
+      },
+    );
+    // Home loads (its own text isn't translated yet).
+    expect(find.text('What are you checking today?'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Fungura menu'));
+    await tester.pumpAndSettle();
+    expect(find.text('Igenamiterere'), findsOneWidget);
+
+    await tester.tap(find.text('Sohoka'));
+    await tester.pumpAndSettle();
+    expect(find.text('Gusohoka muri Hakikisha?'), findsOneWidget);
+    expect(find.text('Guma winjiye'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }
