@@ -42,7 +42,7 @@ The app is connected to the Firebase project **`hakikisha-acd9a`** for Android (
 | `android/app/google-services.json` | Android Firebase config |
 | `firebase.json` | FlutterFire and Firebase CLI config |
 | `firestore.rules`, `storage.rules` | Security rules for every collection and for photo uploads. See [docs/database.md](docs/database.md) |
-| `firestore.indexes.json` | Composite indexes for the history and reports lists |
+| `firestore.indexes.json` | Composite indexes for the history list |
 
 - **Don't run `flutterfire configure`.** It's already done. Running it again can register duplicate apps or overwrite these files. If you think it needs re-running, ask in the group first.
 - **Console access:** you've been added as an Editor. Open the project at https://console.firebase.google.com/project/hakikisha-acd9a. Enabled so far: Email/Password sign-in and Firestore (production mode).
@@ -160,7 +160,7 @@ These field names are the contract. Use them exactly in models, security rules a
 
 - The `users` doc ID is the Firebase Auth `uid`.
 - Timestamps use `FieldValue.serverTimestamp()`. They can be `null` in the first local snapshot, so `fromJson` must handle null.
-- Composite indexes: `scans (userId, scannedAt desc)` and `reports (userId, createdAt desc)`.
+- Composite index: `scans (userId, scannedAt desc)`. Reports are sorted client-side so legacy reports without `createdAt` remain visible.
 - Don't duplicate medicine data inside `scans`; reference it by `batchId`.
 
 ### Git workflow

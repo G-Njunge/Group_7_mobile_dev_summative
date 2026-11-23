@@ -14,16 +14,23 @@ class ReportRemoteDataSource {
   Stream<List<ReportEntity>> watchMyReports(String userId) => _firestore
       .collection('reports')
       .where('userId', isEqualTo: userId)
-      .orderBy('createdAt', descending: true)
       .snapshots()
-      .map(
-        (snapshot) => snapshot.docs
+      .map((snapshot) {
+        final reports = snapshot.docs
             .map(
               (document) =>
                   _reportFromJson(document.data(), reportId: document.id),
             )
-            .toList(),
-      );
+            .toList();
+        reports.sort((a, b) {
+          final aCreatedAt = a.createdAt;
+          final bCreatedAt = b.createdAt;
+          if (aCreatedAt == null) return bCreatedAt == null ? 0 : 1;
+          if (bCreatedAt == null) return -1;
+          return bCreatedAt.compareTo(aCreatedAt);
+        });
+        return reports;
+      });
 
   Future<void> createCounterfeitReport({
     required String userId,

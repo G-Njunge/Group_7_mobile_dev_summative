@@ -161,7 +161,20 @@ class _PharmacyMapViewState extends State<_PharmacyMapView> {
                                   _buildMap(state),
                                   if (state.status == PharmacyMapStatus.loading)
                                     const _MapMessage(
-                                      child: CircularProgressIndicator(),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          SizedBox(
+                                            width: 20,
+                                            height: 20,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                            ),
+                                          ),
+                                          SizedBox(width: 10),
+                                          Text('Loading pharmacies…'),
+                                        ],
+                                      ),
                                     ),
                                   if (state.status == PharmacyMapStatus.error)
                                     _MapMessage(
@@ -653,9 +666,20 @@ class _MapMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Positioned.fill(
-    child: ColoredBox(
-      color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.9),
-      child: Center(child: child),
+    child: Align(
+      alignment: Alignment.topCenter,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Material(
+          elevation: 3,
+          color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.96),
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            child: child,
+          ),
+        ),
+      ),
     ),
   );
 }

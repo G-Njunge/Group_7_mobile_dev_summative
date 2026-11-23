@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hakikisha_summative/features/pharmacy/domain/entities/pharmacy_coordinates.dart';
 import 'package:hakikisha_summative/features/pharmacy/domain/entities/pharmacy_entity.dart';
@@ -61,6 +62,9 @@ void main() {
 
   testWidgets('loads, searches, and opens pharmacy details', (tester) async {
     await tester.pumpPage(PharmacyMapPage(cubit: cubit), settle: false);
+
+    expect(find.byType(FlutterMap), findsOneWidget);
+    expect(find.text('Loading pharmacies…'), findsOneWidget);
 
     repository.controller.add([coast, central]);
     await tester.pumpAndSettle();

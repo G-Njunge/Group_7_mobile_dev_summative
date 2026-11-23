@@ -69,6 +69,41 @@ void main() {
     ]);
   });
 
+  test(
+    'sorts reports locally and includes documents without createdAt',
+    () async {
+      await firestore.collection('reports').doc('older').set({
+        'userId': 'user-1',
+        'pharmacyId': 'pharmacy-1',
+        'description': 'Older report',
+        'status': 'pending',
+        'createdAt': Timestamp.fromDate(DateTime(2026, 11, 19)),
+      });
+      await firestore.collection('reports').doc('newer').set({
+        'userId': 'user-1',
+        'pharmacyId': 'pharmacy-1',
+        'description': 'Newer report',
+        'status': 'pending',
+        'createdAt': Timestamp.fromDate(DateTime(2026, 11, 20)),
+      });
+      await firestore.collection('reports').doc('legacy').set({
+        'userId': 'user-1',
+        'pharmacyId': 'pharmacy-1',
+        'description': 'Legacy report',
+        'status': 'pending',
+      });
+
+      final reports = await dataSource.watchMyReports('user-1').first;
+
+      expect(reports.map((report) => report.reportId), [
+        'newer',
+        'older',
+        'legacy',
+      ]);
+      expect(reports.last.createdAt, isNull);
+    },
+  );
+
   test('updates and deletes a report document by id', () async {
     final document = firestore.collection('reports').doc('report-1');
     await document.set({'description': 'Old', 'pharmacyId': 'old-pharmacy'});

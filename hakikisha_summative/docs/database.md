@@ -84,8 +84,9 @@ erDiagram
 - **Server timestamps.** `createdAt`, `scannedAt` and `updatedAt` are written
   with `FieldValue.serverTimestamp()`, and the rules reject client-made dates.
   They are `null` in the first local snapshot, so every `fromJson` handles null.
-- **Composite indexes** (`firestore.indexes.json`) back the two list screens:
-  `scans (userId ASC, scannedAt DESC)` and `reports (userId ASC, createdAt DESC)`.
+- **Composite index** (`firestore.indexes.json`) backs history:
+  `scans (userId ASC, scannedAt DESC)`. Reports are sorted client-side so
+  legacy documents without `createdAt` remain visible.
 - **Photos** live in Cloud Storage at `reports/{uid}/{reportId}/{file}` and
   `users/{uid}/avatar/{file}`. Firestore stores only their download URLs.
 
