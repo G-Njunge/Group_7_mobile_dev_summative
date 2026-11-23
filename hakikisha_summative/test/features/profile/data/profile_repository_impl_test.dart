@@ -39,7 +39,7 @@ void main() {
       'uid': 'u1',
       'fullName': 'Amina Wanjiru',
       'email': 'amina@example.com',
-      'phone': '+254712345678',
+      'phone': '+250788123456',
       'authProvider': 'password',
       'photoUrl': null,
       'createdAt': Timestamp.fromDate(DateTime(2026, 11, 1)),
@@ -52,7 +52,7 @@ void main() {
     expect(profile, isNotNull);
     expect(profile!.uid, 'u1');
     expect(profile.fullName, 'Amina Wanjiru');
-    expect(profile.phone, '+254712345678');
+    expect(profile.phone, '+250788123456');
     expect(profile.authProvider, 'password');
     expect(profile.createdAt, DateTime(2026, 11, 1));
   });
@@ -67,12 +67,12 @@ void main() {
     await repository.updateProfile(
       uid: 'u1',
       fullName: 'Amina W',
-      phone: '+254700000000',
+      phone: '+250788000000',
     );
 
     final data = (await firestore.collection('users').doc('u1').get()).data()!;
     expect(data['fullName'], 'Amina W');
-    expect(data['phone'], '+254700000000');
+    expect(data['phone'], '+250788000000');
     expect(data['email'], 'amina@example.com');
     expect(data['authProvider'], 'password');
     expect(data['createdAt'], isA<Timestamp>());

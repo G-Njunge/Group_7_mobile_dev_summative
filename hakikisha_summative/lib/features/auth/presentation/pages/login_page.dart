@@ -13,7 +13,7 @@ import '../widgets/continue_with_google.dart';
 import 'forgot_password_page.dart';
 import 'register_page.dart';
 
-/// 03 Login. Provides a fresh [LoginCubit]; on success the AuthGate moves
+/// 03 Login. Provides a fresh [LoginCubit]; on success the router moves
 /// on by itself.
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});

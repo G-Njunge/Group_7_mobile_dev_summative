@@ -12,25 +12,18 @@ class ReportRepositoryImpl implements ReportRepository {
       _remoteDataSource.watchMyReports(userId);
 
   @override
-  Future<void> createCounterfeitReport({
+  Future<void> createReport({
     required String userId,
-    required String pharmacyId,
-    required String description,
-  }) => _remoteDataSource.createCounterfeitReport(
-    userId: userId,
-    pharmacyId: pharmacyId,
-    description: description,
-  );
+    required ReportDraft draft,
+  }) => _remoteDataSource.createReport(userId: userId, draft: draft.normalized);
 
   @override
   Future<void> updatePendingReport({
     required String reportId,
-    required String pharmacyId,
-    required String description,
+    required ReportDraft draft,
   }) => _remoteDataSource.updatePendingReport(
     reportId: reportId,
-    pharmacyId: pharmacyId,
-    description: description,
+    draft: draft.normalized,
   );
 
   @override

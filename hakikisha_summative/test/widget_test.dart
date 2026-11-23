@@ -1,7 +1,7 @@
 import 'dart:async';
 
 // ignore: deprecated_member_use
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
@@ -15,6 +15,10 @@ import 'package:hakikisha_summative/features/auth/domain/repositories/auth_repos
 import 'package:hakikisha_summative/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:hakikisha_summative/features/history/domain/repositories/history_repository.dart';
 import 'package:hakikisha_summative/features/history/presentation/bloc/history_cubit.dart';
+import 'package:hakikisha_summative/features/scan/domain/entities/scan_record_entity.dart';
+import 'package:hakikisha_summative/features/scan/domain/repositories/scan_repository.dart';
+import 'package:hakikisha_summative/features/scan/domain/usecases/verify_medicine_usecase.dart';
+import 'package:hakikisha_summative/features/scan/presentation/bloc/scan_bloc.dart';
 import 'package:hakikisha_summative/features/settings/data/repositories/settings_repository_impl.dart';
 import 'package:hakikisha_summative/features/settings/domain/entities/app_settings.dart';
 import 'package:hakikisha_summative/features/settings/presentation/bloc/settings_cubit.dart';
@@ -26,6 +30,8 @@ import 'helpers/pump_app.dart';
 class MockAuthRepository extends Mock implements AuthRepository {}
 
 class MockHistoryRepository extends Mock implements HistoryRepository {}
+
+class MockScanRepository extends Mock implements ScanRepository {}
 
 /// Whole-app tests: real router, redirect, drawer, auth screens, settings
 /// and SharedPreferences, with only Firebase replaced by [FakeSessionSource]
@@ -43,6 +49,20 @@ void main() {
         .thenAnswer((_) => authChanges.stream);
     GetIt.instance.registerSingleton<AuthRepository>(repository);
     registerAuthPresentation(GetIt.instance);
+
+    // Home is the real scan screen, so it needs the scan dependencies.
+    final scan = MockScanRepository();
+    when(() => scan.watchLatestScan(any()))
+        .thenAnswer((_) => Stream<ScanRecordEntity?>.value(null));
+    GetIt.instance
+      ..registerLazySingleton<ScanRepository>(() => scan)
+      ..registerFactory<ScanBloc>(
+        () => ScanBloc(
+          repository: scan,
+          verifyMedicineUseCase: VerifyMedicineUseCase(),
+          getCurrentUserId: () => 'u',
+        ),
+      );
   });
 
   tearDown(() async {
@@ -77,6 +97,18 @@ void main() {
         ),
       ),
     );
+    // A signed-in session always has a user in the real app, so give the
+    // AuthBloc one — Home reads it for the greeting and the user id.
+    if (status == SessionStatus.signedIn) {
+      authChanges.add(
+        const AppUser(
+          uid: 'u',
+          email: 'amina@gmail.com',
+          emailVerified: true,
+          fullName: 'Amina Otieno',
+        ),
+      );
+    }
     await tester.pumpAndSettle();
   }
 
@@ -123,7 +155,7 @@ void main() {
 
   testWidgets('a signed-in user lands on Home', (tester) async {
     await launch(tester);
-    expect(find.text('Home'), findsOneWidget);
+    expect(find.text('What are you checking today?'), findsOneWidget);
   });
 
   testWidgets('signing in from Login moves to Home and clears the stack', (
@@ -134,10 +166,18 @@ void main() {
     await tester.pumpAndSettle();
 
     session.emit(SessionStatus.signedIn);
+    authChanges.add(
+      const AppUser(
+        uid: 'u',
+        email: 'amina@gmail.com',
+        emailVerified: true,
+        fullName: 'Amina Otieno',
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Welcome back'), findsNothing);
-    expect(find.text('Home'), findsOneWidget);
+    expect(find.text('What are you checking today?'), findsOneWidget);
     // Login went with the landing page, so there's nothing to go back to.
     expect(find.byTooltip('Open menu'), findsOneWidget);
   });
@@ -209,6 +249,35 @@ void main() {
     expect(settings.state.settings.theme, ThemePreference.dark);
     final context = tester.element(find.byType(Scaffold).first);
     expect(Theme.of(context).brightness, Brightness.dark);
-    expect(find.text('Skrini hii inajengwa.'), findsOneWidget);
+    // Swahili applied app-wide: the drawer labels are translated. Open the
+    // menu by icon, since its tooltip is itself translated.
+    await tester.tap(find.byIcon(Icons.menu));
+    await tester.pumpAndSettle();
+    expect(find.text('Mipangilio'), findsOneWidget);
+  });
+
+  testWidgets('the app runs in Kinyarwanda, including built-in widgets', (
+    tester,
+  ) async {
+    // Flutter has no built-in Kinyarwanda strings, so the drawer and dialog
+    // below only work thanks to the English fallback delegates.
+    await launch(
+      tester,
+      savedPrefs: {
+        SettingsRepositoryImpl.languageKey: AppLanguage.kinyarwanda.name,
+      },
+    );
+    // Home loads (its own text isn't translated yet).
+    expect(find.text('What are you checking today?'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Fungura menu'));
+    await tester.pumpAndSettle();
+    expect(find.text('Igenamiterere'), findsOneWidget);
+
+    await tester.tap(find.text('Sohoka'));
+    await tester.pumpAndSettle();
+    expect(find.text('Gusohoka muri Hakikisha?'), findsOneWidget);
+    expect(find.text('Guma winjiye'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }

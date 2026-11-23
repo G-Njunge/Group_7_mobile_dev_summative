@@ -1,16 +1,21 @@
-import 'dart:async';
-
-// ignore: deprecated_member_use
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 
-import '../../../../core/widgets/app_drawer.dart';
-import '../../../pharmacy/domain/entities/pharmacy_entity.dart';
+import '../../../../core/router/app_routes.dart';
+import '../../../../core/theme/app_palette.dart';
+import '../../../../core/widgets/app_buttons.dart';
+import '../../../../core/widgets/app_scaffold.dart';
+import '../../../../core/widgets/app_snack_bar.dart';
+import '../../../../core/widgets/confirm_dialog.dart';
+import '../../../../core/widgets/neumorphic.dart';
 import '../../domain/entities/report_entity.dart';
 import '../bloc/report_cubit.dart';
 import '../bloc/report_state.dart';
+import '../widgets/report_form_fields.dart';
 
+/// The user's reports: read, edit and withdraw while pending.
 class MyReportsPage extends StatelessWidget {
   const MyReportsPage({required this.userId, super.key});
 
@@ -18,387 +23,318 @@ class MyReportsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => BlocProvider(
-    create: (_) => GetIt.instance<ReportCubit>(),
-    child: _MyReportsView(userId: userId),
+    create: (_) => GetIt.instance<ReportCubit>()..start(userId: userId),
+    child: const _MyReportsView(),
   );
 }
 
-class _MyReportsView extends StatefulWidget {
-  const _MyReportsView({required this.userId});
-
-  final String userId;
+class _MyReportsView extends StatelessWidget {
+  const _MyReportsView();
 
   @override
-  State<_MyReportsView> createState() => _MyReportsViewState();
-}
-
-class _MyReportsViewState extends State<_MyReportsView> {
-  @override
-  void initState() {
-    super.initState();
-    unawaited(context.read<ReportCubit>().start(userId: widget.userId));
-  }
-
-  @override
-  Widget build(BuildContext context) => BlocConsumer<ReportCubit, ReportState>(
-    listenWhen: (previous, current) =>
-        previous.actionErrorMessage != current.actionErrorMessage &&
-        current.actionErrorMessage != null,
-    listener: (context, state) {
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text(state.actionErrorMessage!)));
-    },
-    builder: (context, state) => Scaffold(
-      // Opened from the report form it's pushed, so it shows a back arrow.
-      drawer: Navigator.of(context).canPop() ? null : const AppDrawer(),
-      appBar: AppBar(title: const Text('My reports')),
-      body: switch (state.reportsStatus) {
+  Widget build(BuildContext context) => AppScaffold(
+    title: 'My reports',
+    body: BlocConsumer<ReportCubit, ReportState>(
+      listenWhen: (previous, current) =>
+          current.actionErrorMessage != null &&
+          previous.actionErrorMessage != current.actionErrorMessage,
+      listener: (context, state) =>
+          showAppSnackBar(context, state.actionErrorMessage!),
+      builder: (context, state) => switch (state.reportsStatus) {
         MyReportsStatus.loading => const Center(
           child: CircularProgressIndicator(),
         ),
-        MyReportsStatus.error => _LoadError(
-          message: state.errorMessage ?? 'Could not load your reports.',
-          onRetry: () => unawaited(
-            context.read<ReportCubit>().start(userId: widget.userId),
-          ),
+        MyReportsStatus.error => _Message(
+          icon: Icons.cloud_off_outlined,
+          text: state.errorMessage ?? "We couldn't load your reports.",
         ),
-        MyReportsStatus.loaded when state.reports.isEmpty =>
-          const _EmptyReports(),
-        MyReportsStatus.loaded => _ReportList(
-          reports: state.reports,
-          pharmacies: state.pharmacies,
-          actionReportId: state.actionReportId,
-          onEdit: (report) => _editReport(report, state.pharmacies),
-          onDelete: _deleteReport,
+        MyReportsStatus.loaded when state.reports.isEmpty => const _Message(
+          icon: Icons.assignment_outlined,
+          text: "You haven't reported a medicine yet.",
+          showReportButton: true,
+        ),
+        MyReportsStatus.loaded => ListView.separated(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
+          itemCount: state.reports.length + 1,
+          separatorBuilder: (_, _) => const SizedBox(height: 14),
+          itemBuilder: (context, index) => index == state.reports.length
+              ? SecondaryButton(
+                  label: 'Report another medicine',
+                  icon: Icons.add,
+                  onPressed: () => context.go(AppRoutes.report),
+                )
+              : _ReportCard(report: state.reports[index], state: state),
         ),
       },
     ),
   );
-
-  Future<void> _editReport(
-    ReportEntity report,
-    List<PharmacyEntity> pharmacies,
-  ) async {
-    if (!report.isPending) return;
-    final cubit = context.read<ReportCubit>();
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => _EditReportDialog(
-        report: report,
-        pharmacies: pharmacies,
-        onSave: (description, pharmacyId) => cubit.updateReport(
-          report: report,
-          description: description,
-          pharmacyId: pharmacyId,
-        ),
-      ),
-    );
-    if (result == true && mounted) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Report updated.')));
-    }
-  }
-
-  Future<void> _deleteReport(ReportEntity report) async {
-    if (!report.isPending) return;
-    final shouldDelete = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Withdraw report?'),
-        content: const Text(
-          'This will permanently delete your pending report.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Keep report'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Withdraw'),
-          ),
-        ],
-      ),
-    );
-    if (shouldDelete != true || !mounted) return;
-
-    final deleted = await context.read<ReportCubit>().deleteReport(report);
-    if (deleted && mounted) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Report withdrawn.')));
-    }
-  }
 }
 
-class _ReportList extends StatelessWidget {
-  const _ReportList({
-    required this.reports,
-    required this.pharmacies,
-    required this.actionReportId,
-    required this.onEdit,
-    required this.onDelete,
-  });
-
-  final List<ReportEntity> reports;
-  final List<PharmacyEntity> pharmacies;
-  final String? actionReportId;
-  final ValueChanged<ReportEntity> onEdit;
-  final ValueChanged<ReportEntity> onDelete;
-
-  @override
-  Widget build(BuildContext context) => ListView.separated(
-    padding: const EdgeInsets.all(16),
-    itemCount: reports.length,
-    separatorBuilder: (_, _) => const SizedBox(height: 12),
-    itemBuilder: (context, index) {
-      final report = reports[index];
-      final pharmacy = _pharmacyName(report.pharmacyId, pharmacies);
-      final isWorking = actionReportId != null;
-      return Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      report.isPending
-                          ? 'Pending'
-                          : _statusLabel(report.status),
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                  ),
-                  Chip(label: Text(_statusLabel(report.status))),
-                ],
-              ),
-              Text(pharmacy),
-              if (report.createdAt != null)
-                Text(
-                  'Submitted ${_formatDate(report.createdAt!)}',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              const SizedBox(height: 8),
-              Text(report.description),
-              if (report.isPending) ...[
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    TextButton.icon(
-                      onPressed: isWorking ? null : () => onEdit(report),
-                      icon: const Icon(Icons.edit_outlined),
-                      label: const Text('Edit'),
-                    ),
-                    TextButton.icon(
-                      onPressed: isWorking ? null : () => onDelete(report),
-                      icon: isWorking
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.delete_outline),
-                      label: const Text('Withdraw'),
-                    ),
-                  ],
-                ),
-              ],
-            ],
-          ),
-        ),
-      );
-    },
-  );
-
-  String _pharmacyName(String pharmacyId, List<PharmacyEntity> pharmacies) {
-    for (final pharmacy in pharmacies) {
-      if (pharmacy.pharmacyId == pharmacyId) return pharmacy.name;
-    }
-    return 'Pharmacy no longer available';
-  }
-
-  String _statusLabel(String status) => switch (status) {
-    'pending' => 'Pending',
-    'reviewed' => 'Reviewed',
-    _ => status,
-  };
-
-  String _formatDate(DateTime date) =>
-      '${date.year}-${_twoDigits(date.month)}-${_twoDigits(date.day)}';
-
-  String _twoDigits(int value) => value.toString().padLeft(2, '0');
-}
-
-class _EditReportDialog extends StatefulWidget {
-  const _EditReportDialog({
-    required this.report,
-    required this.pharmacies,
-    required this.onSave,
-  });
+class _ReportCard extends StatelessWidget {
+  const _ReportCard({required this.report, required this.state});
 
   final ReportEntity report;
-  final List<PharmacyEntity> pharmacies;
-  final Future<bool> Function(String description, String pharmacyId) onSave;
+  final ReportState state;
 
   @override
-  State<_EditReportDialog> createState() => _EditReportDialogState();
-}
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    final busy = state.actionReportId == report.reportId;
+    final where = [
+      state.pharmacyName(report.pharmacyId),
+      report.purchaseLocation,
+    ].whereType<String>().join(' · ');
+    final details = [
+      if (report.batchNumber != null) 'Batch ${report.batchNumber}',
+      if (where.isNotEmpty) where,
+      if (report.createdAt != null) 'Sent ${_formatDate(report.createdAt!)}',
+    ];
 
-class _EditReportDialogState extends State<_EditReportDialog> {
-  final _formKey = GlobalKey<FormState>();
-  late final TextEditingController _descriptionController;
-  late String? _pharmacyId;
-  bool _isSaving = false;
-  String? _errorMessage;
-
-  @override
-  void initState() {
-    super.initState();
-    _descriptionController = TextEditingController(
-      text: widget.report.description,
-    );
-    _pharmacyId =
-        widget.pharmacies.any(
-          (pharmacy) => pharmacy.pharmacyId == widget.report.pharmacyId,
-        )
-        ? widget.report.pharmacyId
-        : null;
-  }
-
-  @override
-  void dispose() {
-    _descriptionController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => AlertDialog(
-    title: const Text('Edit pending report'),
-    content: Form(
-      key: _formKey,
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              controller: _descriptionController,
-              minLines: 3,
-              maxLines: 5,
-              maxLength: 2000,
-              decoration: const InputDecoration(
-                labelText: 'Description',
-                border: OutlineInputBorder(),
-              ),
-              validator: (value) => value == null || value.trim().isEmpty
-                  ? 'Enter a description.'
-                  : null,
-            ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<String>(
-              initialValue: _pharmacyId,
-              decoration: const InputDecoration(
-                labelText: 'Pharmacy',
-                border: OutlineInputBorder(),
-              ),
-              items: [
-                for (final pharmacy in widget.pharmacies)
-                  DropdownMenuItem(
-                    value: pharmacy.pharmacyId,
-                    child: Text(
-                      pharmacy.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-              ],
-              onChanged: _isSaving
-                  ? null
-                  : (value) => setState(() => _pharmacyId = value),
-              validator: (value) => value == null ? 'Select a pharmacy.' : null,
-            ),
-            if (_errorMessage != null) ...[
-              const SizedBox(height: 8),
-              Align(
-                alignment: Alignment.centerLeft,
+    return NeuCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
                 child: Text(
-                  _errorMessage!,
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                  report.medicineName.isEmpty
+                      ? 'Medicine report'
+                      : report.medicineName,
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
+              _StatusPill(pending: report.isPending),
             ],
+          ),
+          if (details.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              details.join('\n'),
+              style: TextStyle(color: palette.textMuted, fontSize: 13),
+            ),
           ],
-        ),
-      ),
-    ),
-    actions: [
-      TextButton(
-        onPressed: _isSaving ? null : () => Navigator.of(context).pop(false),
-        child: const Text('Cancel'),
-      ),
-      FilledButton(
-        onPressed: _isSaving ? null : _save,
-        child: _isSaving
-            ? const SizedBox(
-                width: 18,
-                height: 18,
-                child: CircularProgressIndicator(strokeWidth: 2),
+          const SizedBox(height: 10),
+          Text(report.description, style: TextStyle(color: palette.text)),
+          if (report.isPending) ...[
+            const SizedBox(height: 8),
+            if (busy)
+              const Padding(
+                padding: EdgeInsets.all(12),
+                child: Center(child: CircularProgressIndicator()),
               )
-            : const Text('Save'),
+            else
+              // Wrap, not Row: on narrow phones or large text the buttons
+              // move to a second line instead of overflowing.
+              Wrap(
+                alignment: WrapAlignment.end,
+                spacing: 4,
+                children: [
+                  TextButton.icon(
+                    onPressed: state.actionReportId == null
+                        ? () => _edit(context)
+                        : null,
+                    icon: const Icon(Icons.edit_outlined),
+                    label: const Text('Edit'),
+                  ),
+                  TextButton.icon(
+                    onPressed: state.actionReportId == null
+                        ? () => _withdraw(context)
+                        : null,
+                    style: TextButton.styleFrom(
+                      foregroundColor: Theme.of(context).colorScheme.error,
+                    ),
+                    icon: const Icon(Icons.delete_outline),
+                    label: const Text('Withdraw'),
+                  ),
+                ],
+              ),
+          ],
+        ],
       ),
-    ],
-  );
-
-  Future<void> _save() async {
-    if (!_formKey.currentState!.validate()) return;
-    setState(() => _isSaving = true);
-    final saved = await widget.onSave(
-      _descriptionController.text,
-      _pharmacyId!,
     );
-    if (!mounted) return;
-    if (saved) {
-      Navigator.of(context).pop(true);
-    } else {
-      setState(() {
-        _isSaving = false;
-        _errorMessage = 'Could not save the report. Please try again.';
-      });
+  }
+
+  Future<void> _edit(BuildContext context) async {
+    final cubit = context.read<ReportCubit>();
+    final saved = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: context.palette.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => BlocProvider.value(
+        value: cubit,
+        child: _EditReportSheet(report: report),
+      ),
+    );
+    if (saved == true && context.mounted) {
+      showAppSnackBar(context, 'Report updated.', type: SnackType.success);
+    }
+  }
+
+  Future<void> _withdraw(BuildContext context) async {
+    final cubit = context.read<ReportCubit>();
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'Withdraw this report?',
+      message: 'It will be deleted and can no longer be reviewed.',
+      confirmLabel: 'Withdraw',
+      cancelLabel: 'Keep report',
+    );
+    if (!confirmed) return;
+    final deleted = await cubit.deleteReport(report);
+    if (deleted && context.mounted) {
+      showAppSnackBar(context, 'Report withdrawn.', type: SnackType.success);
     }
   }
 }
 
-class _LoadError extends StatelessWidget {
-  const _LoadError({required this.message, required this.onRetry});
+/// Bottom sheet that edits a pending report with the same fields as the form.
+class _EditReportSheet extends StatefulWidget {
+  const _EditReportSheet({required this.report});
 
-  final String message;
-  final VoidCallback onRetry;
+  final ReportEntity report;
 
   @override
-  Widget build(BuildContext context) => Center(
-    child: Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(message, textAlign: TextAlign.center),
-          const SizedBox(height: 12),
-          FilledButton(onPressed: onRetry, child: const Text('Retry')),
-        ],
-      ),
-    ),
-  );
+  State<_EditReportSheet> createState() => _EditReportSheetState();
 }
 
-class _EmptyReports extends StatelessWidget {
-  const _EmptyReports();
+class _EditReportSheetState extends State<_EditReportSheet> {
+  // The form key and the draft being edited; no setState needed.
+  final _formKey = GlobalKey<FormState>();
+  late ReportDraft _draft = widget.report.draft;
+
+  Future<void> _save(ReportCubit cubit) async {
+    if (!_formKey.currentState!.validate()) return;
+    final saved = await cubit.updateReport(
+      report: widget.report,
+      draft: _draft,
+    );
+    if (saved && mounted) Navigator.of(context).pop(true);
+  }
 
   @override
-  Widget build(BuildContext context) => const Center(
-    child: Padding(
-      padding: EdgeInsets.all(24),
-      child: Text('You have not submitted any reports yet.'),
-    ),
-  );
+  Widget build(BuildContext context) {
+    final cubit = context.read<ReportCubit>();
+    return Padding(
+      // Lift the sheet above the keyboard.
+      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+      child: BlocBuilder<ReportCubit, ReportState>(
+        builder: (context, state) => Form(
+          key: _formKey,
+          child: ListView(
+            shrinkWrap: true,
+            padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
+            children: [
+              Text(
+                'Edit report',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 16),
+              ReportFormFields(
+                initial: _draft,
+                pharmacies: state.pharmacies,
+                enabled: state.actionReportId == null,
+                onChanged: (draft) => _draft = draft,
+              ),
+              const SizedBox(height: 24),
+              PrimaryButton(
+                label: 'Save changes',
+                loading: state.actionReportId == widget.report.reportId,
+                onPressed: () => _save(cubit),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _StatusPill extends StatelessWidget {
+  const _StatusPill({required this.pending});
+
+  final bool pending;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    return DecoratedBox(
+      decoration: ShapeDecoration(
+        shape: const StadiumBorder(),
+        color: pending ? palette.field : palette.brand,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        child: Text(
+          pending ? 'Pending' : 'Reviewed',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            color: pending ? palette.heading : palette.onBrand,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Centred icon and text for the empty and error states.
+class _Message extends StatelessWidget {
+  const _Message({
+    required this.icon,
+    required this.text,
+    this.showReportButton = false,
+  });
+
+  final IconData icon;
+  final String text;
+  final bool showReportButton;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    return ListView(
+      padding: const EdgeInsets.all(32),
+      children: [
+        const SizedBox(height: 48),
+        Icon(icon, size: 56, color: palette.heading),
+        const SizedBox(height: 16),
+        Text(
+          text,
+          textAlign: TextAlign.center,
+          style: TextStyle(color: palette.textMuted),
+        ),
+        if (showReportButton) ...[
+          const SizedBox(height: 24),
+          PrimaryButton(
+            label: 'Report a medicine',
+            onPressed: () => context.go(AppRoutes.report),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+String _formatDate(DateTime date) {
+  const months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+  final local = date.toLocal();
+  return '${local.day} ${months[local.month - 1]} ${local.year}';
 }

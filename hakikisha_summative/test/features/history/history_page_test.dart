@@ -54,6 +54,8 @@ Future<_FakeRepo> _pumpPage(WidgetTester tester) async {
 
   await tester.pumpWidget(
     MaterialApp.router(
+      // The app's full list, which includes the material_ui strings the
+      // drawer needs.
       localizationsDelegates: appLocalizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       routerConfig: router,

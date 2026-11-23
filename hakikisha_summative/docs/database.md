@@ -29,7 +29,7 @@ erDiagram
         string medicineId PK
         string name
         string manufacturer
-        string ppbRegNo
+        string registrationNo
         string dosageForm
         string strength
     }
@@ -54,8 +54,11 @@ erDiagram
         string userId FK
         string scanId FK "optional"
         string pharmacyId FK "optional"
-        string description
-        array photoUrls "max 3, Storage URLs"
+        string medicineName "what is being reported"
+        string batchNumber "optional, from the pack"
+        string purchaseLocation "optional, shop if not listed"
+        string description "what looked wrong"
+        array photoUrls "empty, Storage not used"
         string status "pending | reviewed"
         timestamp createdAt "server time"
         timestamp updatedAt "server time"
@@ -86,8 +89,13 @@ erDiagram
   They are `null` in the first local snapshot, so every `fromJson` handles null.
 - **Composite indexes** (`firestore.indexes.json`) back the two list screens:
   `scans (userId ASC, scannedAt DESC)` and `reports (userId ASC, createdAt DESC)`.
-- **Photos** live in Cloud Storage at `reports/{uid}/{reportId}/{file}` and
-  `users/{uid}/avatar/{file}`. Firestore stores only their download URLs.
+- **Reports describe the medicine directly.** `medicineName`, `batchNumber` and
+  `purchaseLocation` are what the user typed, because a report can be filed
+  without a scan and a fake pack may match no batch. `pharmacyId` is set only
+  when the shop is one of the listed pharmacies.
+- **No Cloud Storage.** The team chose not to use it, so `photoUrls` is always
+  an empty list. It is kept, and `storage.rules` stays tested in the emulator,
+  so photos can be added later without changing the data model.
 
 ## Security rules
 

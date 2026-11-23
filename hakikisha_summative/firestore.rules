@@ -91,10 +91,17 @@ service cloud.firestore {
       function validReport() {
         return hasShape(
             ['userId', 'description', 'photoUrls', 'status', 'createdAt', 'updatedAt'],
-            ['reportId', 'scanId', 'pharmacyId'])
+            ['reportId', 'scanId', 'pharmacyId', 'medicineName', 'batchNumber', 'purchaseLocation'])
           && data().get('reportId', reportId) == reportId
           && isText(data().description, 1, 2000)
           && data().description.matches('.*\\S.*')
+          // The medicine being reported. Optional so reports filed before the
+          // field existed stay editable, but never blank when present.
+          && (!('medicineName' in data())
+              || (isText(data().medicineName, 1, 120) && data().medicineName.matches('.*\\S.*')))
+          && isOptionalText(data().get('batchNumber', null), 64)
+          // Free text when the shop isn't in the pharmacies collection.
+          && isOptionalText(data().get('purchaseLocation', null), 200)
           && data().photoUrls is list
           && data().photoUrls.size() <= 3
           && isOptionalText(data().get('scanId', null), 128)

@@ -281,7 +281,7 @@ class _PharmacyMapViewState extends State<_PharmacyMapView> {
   Widget _buildMap(PharmacyMapState state) => FlutterMap(
     mapController: _mapController,
     options: const MapOptions(
-      initialCenter: LatLng(-1.286389, 36.817223),
+      initialCenter: LatLng(-1.9441, 30.0619),
       initialZoom: 11,
     ),
     children: [
@@ -619,23 +619,26 @@ class _SearchResults extends StatelessWidget {
                   currentLocation!,
                   pharmacy.coordinates,
                 );
-          return ListTile(
-            dense: true,
-            leading: Icon(
-              Icons.local_pharmacy,
-              color: pharmacy.verified
-                  ? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).colorScheme.error,
+          return Material(
+            color: Colors.transparent,
+            child: ListTile(
+              dense: true,
+              leading: Icon(
+                Icons.local_pharmacy,
+                color: pharmacy.verified
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.error,
+              ),
+              title: Text(pharmacy.name),
+              subtitle: Text(
+                distance == null
+                    ? pharmacy.address
+                    : '${pharmacy.address} · ${distance.toStringAsFixed(1)} km',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              onTap: () => onSelected(pharmacy),
             ),
-            title: Text(pharmacy.name),
-            subtitle: Text(
-              distance == null
-                  ? pharmacy.address
-                  : '${pharmacy.address} · ${distance.toStringAsFixed(1)} km',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            onTap: () => onSelected(pharmacy),
           );
         },
       ),

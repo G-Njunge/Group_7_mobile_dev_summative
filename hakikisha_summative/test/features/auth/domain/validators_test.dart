@@ -69,7 +69,7 @@ void main() {
     });
   });
 
-  group('validatePhone and normalizeKenyanPhone', () {
+  group('validatePhone and normalizeRwandanPhone', () {
     test('rejects empty and invalid numbers', () {
       expect(validatePhone(''), 'Enter your phone number.');
       expect(validatePhone('12345'), isNotNull);
@@ -77,18 +77,18 @@ void main() {
       expect(validatePhone('+255712345678'), isNotNull);
     });
 
-    test('accepts common Kenyan formats', () {
-      expect(validatePhone('0712345678'), isNull);
-      expect(validatePhone('0112 345 678'), isNull);
-      expect(validatePhone('+254 712 345 678'), isNull);
-      expect(validatePhone('254-712-345678'), isNull);
+    test('accepts common Rwandan formats', () {
+      expect(validatePhone('0788123456'), isNull);
+      expect(validatePhone('0722 123 456'), isNull);
+      expect(validatePhone('+250 788 123 456'), isNull);
+      expect(validatePhone('250-788-123456'), isNull);
     });
 
-    test('normalizes to +254 format', () {
-      expect(normalizeKenyanPhone('0712 345 678'), '+254712345678');
-      expect(normalizeKenyanPhone('+254-112-345678'), '+254112345678');
-      expect(normalizeKenyanPhone('254712345678'), '+254712345678');
-      expect(normalizeKenyanPhone('not a number'), isNull);
+    test('normalizes to +250 format', () {
+      expect(normalizeRwandanPhone('0788 123 456'), '+250788123456');
+      expect(normalizeRwandanPhone('+250-722-123456'), '+250722123456');
+      expect(normalizeRwandanPhone('250788123456'), '+250788123456');
+      expect(normalizeRwandanPhone('not a number'), isNull);
     });
   });
 }

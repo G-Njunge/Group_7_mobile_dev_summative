@@ -11,10 +11,10 @@ import '../widgets/auth_buttons.dart';
 import '../widgets/auth_colors.dart';
 import '../widgets/auth_snackbar.dart';
 
-/// A3 Verify email. Shown by the AuthGate while the user is unverified.
+/// A3 Verify email. Shown by the router while the user is unverified.
 ///
 /// - "I've verified" asks the [AuthBloc] to re-check; once verified, the
-///   AuthGate moves on by itself.
+///   router moves on by itself.
 /// - "Resend email" uses [VerifyEmailCubit], which adds a 60s cooldown.
 /// - "Change it" logs out, so the user can register with another email.
 class VerifyEmailPage extends StatelessWidget {

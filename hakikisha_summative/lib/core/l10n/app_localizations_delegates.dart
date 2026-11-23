@@ -10,17 +10,25 @@ import 'generated/app_localizations.dart';
 
 /// Every localizations delegate the app needs, for `MaterialApp`.
 ///
-/// The app uses two copies of the Material and Cupertino libraries.  Without
-/// both package delegates, scaffold/drawer widgets can throw
-/// `No MaterialLocalizations found` in localized widget tests.
+/// The app uses two copies of the Material and Cupertino libraries: the core
+/// widgets come from the `material_ui` / `cupertino_ui` packages and the other
+/// screens from `flutter/material`. Each copy looks up its own localizations
+/// type, so both sets are registered here. Without the package ones, every
+/// screen with the drawer crashed in Kiswahili ("No MaterialLocalizations
+/// found").
 ///
-/// Flutter and the UI packages do not cover every app locale, so unsupported
-/// locales fall back to English for framework strings while
-/// `AppLocalizations` continues to provide the app's translations.
+/// Neither copy has built-in strings for Kinyarwanda, so the fallbacks at the
+/// end load English for those widgets (dialog buttons, tooltips), while the
+/// app's own strings still come from `AppLocalizations` (`app_rw.arb`).
 const appLocalizationsDelegates = <LocalizationsDelegate<dynamic>>[
+  // App strings plus flutter/material, flutter/cupertino and widgets strings.
   ...AppLocalizations.localizationsDelegates,
+  // Strings for widgets from the material_ui / cupertino_ui packages.
   material_ui.GlobalMaterialLocalizations.delegate,
   cupertino_ui.GlobalCupertinoLocalizations.delegate,
+  // English for languages a library doesn't cover, such as Kinyarwanda.
+  // The type arguments must be explicit: inside this list Dart would
+  // otherwise infer `dynamic`, and the fallback would match nothing.
   _EnglishFallback<flutter_material.MaterialLocalizations>(
     flutter_l10n.GlobalMaterialLocalizations.delegate,
   ),
@@ -38,9 +46,9 @@ const appLocalizationsDelegates = <LocalizationsDelegate<dynamic>>[
   ),
 ];
 
-/// Loads English framework strings when [_delegate] has no strings for a
-/// locale.  Locales supported by [_delegate] are handled by its earlier
-/// delegate and never reach this fallback.
+/// Serves [_delegate]'s English strings for locales [_delegate] doesn't
+/// support. Locales it does support never reach this delegate, because
+/// `Localizations` uses the first delegate that supports the locale.
 class _EnglishFallback<T> extends LocalizationsDelegate<T> {
   const _EnglishFallback(this._delegate);
 
