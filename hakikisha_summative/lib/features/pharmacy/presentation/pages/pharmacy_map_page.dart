@@ -619,23 +619,26 @@ class _SearchResults extends StatelessWidget {
                   currentLocation!,
                   pharmacy.coordinates,
                 );
-          return ListTile(
-            dense: true,
-            leading: Icon(
-              Icons.local_pharmacy,
-              color: pharmacy.verified
-                  ? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).colorScheme.error,
+          return Material(
+            color: Colors.transparent,
+            child: ListTile(
+              dense: true,
+              leading: Icon(
+                Icons.local_pharmacy,
+                color: pharmacy.verified
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.error,
+              ),
+              title: Text(pharmacy.name),
+              subtitle: Text(
+                distance == null
+                    ? pharmacy.address
+                    : '${pharmacy.address} · ${distance.toStringAsFixed(1)} km',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              onTap: () => onSelected(pharmacy),
             ),
-            title: Text(pharmacy.name),
-            subtitle: Text(
-              distance == null
-                  ? pharmacy.address
-                  : '${pharmacy.address} · ${distance.toStringAsFixed(1)} km',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            onTap: () => onSelected(pharmacy),
           );
         },
       ),
