@@ -1,9 +1,10 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hakikisha_summative/core/l10n/app_localizations_delegates.dart';
 import 'package:hakikisha_summative/core/l10n/generated/app_localizations.dart';
 import 'package:hakikisha_summative/core/session/session_cubit.dart';
 import 'package:hakikisha_summative/core/session/session_source.dart';
@@ -52,8 +53,6 @@ extension PumpApp on WidgetTester {
     Locale locale = const Locale('en'),
     bool settle = true,
   }) async {
-    // The Scaffold gives bare widgets (fields, buttons) a Material ancestor
-    // and a place for snackbars; full pages bring their own and nest fine.
     final router = GoRouter(
       routes: [
         GoRoute(
@@ -71,7 +70,7 @@ extension PumpApp on WidgetTester {
         child: MaterialApp.router(
           theme: AppTheme.light,
           locale: locale,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          localizationsDelegates: appLocalizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           routerConfig: router,
         ),

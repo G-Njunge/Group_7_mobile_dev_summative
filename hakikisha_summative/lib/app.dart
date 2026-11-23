@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import 'core/l10n/app_localizations_delegates.dart';
 import 'core/l10n/generated/app_localizations.dart';
 import 'core/session/session_cubit.dart';
 import 'core/theme/app_theme.dart';
@@ -9,9 +10,6 @@ import 'features/settings/presentation/bloc/settings_cubit.dart';
 
 /// Root widget. Provides the app-wide cubits and rebuilds the [MaterialApp]
 /// only when the theme or language setting changes.
-///
-/// Everything is passed in rather than created here, so widget tests can
-/// pump the real app with fakes.
 class HakikishaApp extends StatelessWidget {
   const HakikishaApp({
     super.key,
@@ -40,10 +38,9 @@ class HakikishaApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           theme: AppTheme.light,
           darkTheme: AppTheme.dark,
-          // ThemePreference mirrors ThemeMode's names one-to-one.
           themeMode: ThemeMode.values.byName(state.settings.theme.name),
           locale: Locale(state.settings.language.code),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          localizationsDelegates: appLocalizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           routerConfig: router,
         ),
