@@ -14,6 +14,8 @@ import '../../features/history/presentation/bloc/history_cubit.dart';
 import '../../features/history/presentation/pages/history_page.dart';
 import '../../features/pharmacy/presentation/bloc/pharmacy_map_cubit.dart';
 import '../../features/pharmacy/presentation/pages/pharmacy_map_page.dart';
+import '../../features/profile/presentation/bloc/profile_cubit.dart';
+import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/report/presentation/pages/counterfeit_report_page.dart';
 import '../../features/report/presentation/pages/my_reports_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
@@ -66,7 +68,16 @@ GoRouter createAppRouter(SessionCubit session) => GoRouter(
         ),
       ),
     ),
-    _placeholder(AppRoutes.profile, 'Profile'),
+    GoRoute(
+      path: AppRoutes.profile,
+      builder: (context, _) => _forUser(
+        context,
+        (uid) => BlocProvider(
+          create: (_) => sl<ProfileCubit>()..start(uid),
+          child: const ProfilePage(),
+        ),
+      ),
+    ),
     // M4: pharmacy map & reporting
     GoRoute(
       path: AppRoutes.pharmacies,

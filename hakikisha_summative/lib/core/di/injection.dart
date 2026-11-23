@@ -8,6 +8,7 @@ import '../../features/auth/auth_injection.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/history/history_injection.dart';
 import '../../features/pharmacy/pharmacy_injection.dart';
+import '../../features/profile/profile_injection.dart';
 import '../../features/report/report_injection.dart';
 import '../../features/settings/settings_injection.dart';
 import '../session/session_cubit.dart';
@@ -48,4 +49,5 @@ Future<void> configureDependencies() async {
   registerPharmacyDependencies(sl);
   registerReportDependencies(sl);
   registerSettingsDependencies(sl);
+  registerProfileDependencies(sl);
 }
