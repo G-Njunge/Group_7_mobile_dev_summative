@@ -1,134 +1,82 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-
-import 'dart:typed_data';
 
 import '../../domain/entities/report_entity.dart';
 
+/// Reads and writes the `reports` collection. Field names follow the ERD in
+/// docs/database.md and are enforced by firestore.rules.
+///
+/// The app doesn't use Cloud Storage, so reports are saved without photos and
+/// `photoUrls` stays an empty list.
 class ReportRemoteDataSource {
-  ReportRemoteDataSource(this._firestore, [this._storage]);
+  ReportRemoteDataSource(this._firestore);
 
   final FirebaseFirestore _firestore;
-  final FirebaseStorage? _storage;
 
-  Stream<List<ReportEntity>> watchMyReports(String userId) => _firestore
-      .collection('reports')
+  CollectionReference<Map<String, dynamic>> get _reports =>
+      _firestore.collection('reports');
+
+  Stream<List<ReportEntity>> watchMyReports(String userId) => _reports
       .where('userId', isEqualTo: userId)
       .orderBy('createdAt', descending: true)
       .snapshots()
       .map(
-        (snapshot) => snapshot.docs
-            .map(
-              (document) =>
-                  _reportFromJson(document.data(), reportId: document.id),
-            )
-            .toList(),
+        (snapshot) => [
+          for (final doc in snapshot.docs) _fromJson(doc.data(), doc.id),
+        ],
       );
 
-  Future<void> createCounterfeitReport({
+  Future<void> createReport({
     required String userId,
-    required String pharmacyId,
-    required String description,
-    List<Uint8List> photoBytes = const [],
-  }) async {
-    final report = _firestore.collection('reports').doc();
-    final photoUrls = <String>[];
-
-    try {
-      for (var index = 0; index < photoBytes.length && index < 3; index++) {
-        if (_storage == null) break;
-        final reference = _storage.ref(
-          'reports/$userId/${report.id}/photo_${index + 1}.jpg',
-        );
-        await reference.putData(
-          photoBytes[index],
-          SettableMetadata(contentType: 'image/jpeg'),
-        );
-        photoUrls.add(await reference.getDownloadURL());
-      }
-
-      await report.set({
-        'userId': userId,
-        'scanId': null,
-        'pharmacyId': pharmacyId,
-        'description': description,
-        'photoUrls': photoUrls,
-        'status': 'pending',
-        'createdAt': FieldValue.serverTimestamp(),
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-    } catch (_) {
-      if (_storage != null) {
-        try {
-          final folder = await _storage
-              .ref('reports/$userId/${report.id}')
-              .listAll();
-          await Future.wait(folder.items.map((item) => item.delete()));
-        } on Object {
-          // Upload or cleanup failure should not mask the original submission error.
-        }
-      }
-      rethrow;
-    }
-  }
-
-  Future<void> updatePendingReport({
-    required String reportId,
-    required String pharmacyId,
-    required String description,
-  }) => _firestore.collection('reports').doc(reportId).update({
-    'pharmacyId': pharmacyId,
-    'description': description,
+    required ReportDraft draft,
+  }) => _reports.doc().set({
+    'userId': userId,
+    'scanId': null,
+    ..._draftFields(draft),
+    'photoUrls': const <String>[],
+    'status': 'pending',
+    'createdAt': FieldValue.serverTimestamp(),
     'updatedAt': FieldValue.serverTimestamp(),
   });
 
-  Future<void> deletePendingReport(String reportId) async {
-    final document = _firestore.collection('reports').doc(reportId);
-    final snapshot = await document.get();
-    final userId = snapshot.data()?['userId'];
-
-    await document.delete();
-
-    if (_storage != null && userId is String) {
-      try {
-        final folder = await _storage
-            .ref('reports/$userId/$reportId')
-            .listAll();
-        await Future.wait(folder.items.map((item) => item.delete()));
-      } on Object {
-        // The report document is already deleted; orphaned photos are best-effort.
-      }
-    }
-  }
-
-  ReportEntity _reportFromJson(
-    Map<String, dynamic> json, {
+  Future<void> updatePendingReport({
     required String reportId,
-  }) {
-    final pharmacyId = json['pharmacyId'];
-    final description = json['description'];
-    final status = json['status'];
-    final createdAt = json['createdAt'];
-    final photoUrls = json['photoUrls'];
-    if (pharmacyId is! String ||
-        description is! String ||
-        status is! String ||
-        (photoUrls != null &&
-            (photoUrls is! List ||
-                photoUrls.any((photoUrl) => photoUrl is! String))) ||
-        (createdAt != null && createdAt is! Timestamp)) {
-      throw const FormatException('Invalid report document.');
-    }
+    required ReportDraft draft,
+  }) => _reports.doc(reportId).update({
+    ..._draftFields(draft),
+    'updatedAt': FieldValue.serverTimestamp(),
+  });
 
+  Future<void> deletePendingReport(String reportId) =>
+      _reports.doc(reportId).delete();
+
+  /// The user-editable fields. Optional ones are written as `null` when empty
+  /// so an edit can also clear them.
+  Map<String, Object?> _draftFields(ReportDraft draft) => {
+    'medicineName': draft.medicineName,
+    'batchNumber': draft.batchNumber,
+    'purchaseLocation': draft.purchaseLocation,
+    'pharmacyId': draft.pharmacyId,
+    'description': draft.description,
+  };
+
+  /// Tolerates older reports that have no medicine fields.
+  ReportEntity _fromJson(Map<String, dynamic> json, String reportId) {
+    String? text(String key) =>
+        json[key] is String ? json[key] as String : null;
+    final photoUrls = json['photoUrls'];
+    final createdAt = json['createdAt'];
     return ReportEntity(
       reportId: reportId,
-      pharmacyId: pharmacyId,
-      description: description,
-      status: status,
-      createdAt: (createdAt as Timestamp?)?.toDate(),
+      medicineName: text('medicineName') ?? '',
+      batchNumber: text('batchNumber'),
+      purchaseLocation: text('purchaseLocation'),
+      pharmacyId: text('pharmacyId'),
+      description: text('description') ?? '',
+      status: text('status') ?? 'pending',
+      createdAt: createdAt is Timestamp ? createdAt.toDate() : null,
       photoUrls: photoUrls is List
-          ? photoUrls.cast<String>()
-          : const <String>[],
+          ? photoUrls.whereType<String>().toList()
+          : const [],
     );
   }
 }

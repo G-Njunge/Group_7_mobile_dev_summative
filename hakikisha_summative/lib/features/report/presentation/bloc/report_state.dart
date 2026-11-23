@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:equatable/equatable.dart';
 
 import '../../../pharmacy/domain/entities/pharmacy_entity.dart';
@@ -15,37 +13,43 @@ class ReportState extends Equatable {
     this.pharmacies = const [],
     this.reportsStatus = MyReportsStatus.loading,
     this.reports = const [],
-    this.description = '',
-    this.selectedPharmacyId,
+    this.draft = const ReportDraft(),
     this.isSubmitting = false,
     this.isSubmitted = false,
     this.actionReportId,
     this.actionErrorMessage,
     this.errorMessage,
-    this.photoBytes = const [],
   });
 
   final ReportPharmacyStatus pharmacyStatus;
   final List<PharmacyEntity> pharmacies;
   final MyReportsStatus reportsStatus;
   final List<ReportEntity> reports;
-  final String description;
-  final String? selectedPharmacyId;
+
+  /// What the user has typed on the report form so far.
+  final ReportDraft draft;
   final bool isSubmitting;
   final bool isSubmitted;
+
+  /// The report being edited or withdrawn on My reports, if any.
   final String? actionReportId;
   final String? actionErrorMessage;
   final String? errorMessage;
-  final List<Uint8List> photoBytes;
+
+  /// Name of the pharmacy with [pharmacyId], or `null` if it isn't listed.
+  String? pharmacyName(String? pharmacyId) {
+    for (final pharmacy in pharmacies) {
+      if (pharmacy.pharmacyId == pharmacyId) return pharmacy.name;
+    }
+    return null;
+  }
 
   ReportState copyWith({
     ReportPharmacyStatus? pharmacyStatus,
     List<PharmacyEntity>? pharmacies,
     MyReportsStatus? reportsStatus,
     List<ReportEntity>? reports,
-    String? description,
-    String? selectedPharmacyId,
-    bool clearSelectedPharmacyId = false,
+    ReportDraft? draft,
     bool? isSubmitting,
     bool? isSubmitted,
     String? actionReportId,
@@ -54,16 +58,12 @@ class ReportState extends Equatable {
     bool clearActionErrorMessage = false,
     String? errorMessage,
     bool clearErrorMessage = false,
-    List<Uint8List>? photoBytes,
   }) => ReportState(
     pharmacyStatus: pharmacyStatus ?? this.pharmacyStatus,
     pharmacies: pharmacies ?? this.pharmacies,
     reportsStatus: reportsStatus ?? this.reportsStatus,
     reports: reports ?? this.reports,
-    description: description ?? this.description,
-    selectedPharmacyId: clearSelectedPharmacyId
-        ? null
-        : selectedPharmacyId ?? this.selectedPharmacyId,
+    draft: draft ?? this.draft,
     isSubmitting: isSubmitting ?? this.isSubmitting,
     isSubmitted: isSubmitted ?? this.isSubmitted,
     actionReportId: clearActionReportId
@@ -73,7 +73,6 @@ class ReportState extends Equatable {
         ? null
         : actionErrorMessage ?? this.actionErrorMessage,
     errorMessage: clearErrorMessage ? null : errorMessage ?? this.errorMessage,
-    photoBytes: photoBytes ?? this.photoBytes,
   );
 
   @override
@@ -82,13 +81,11 @@ class ReportState extends Equatable {
     pharmacies,
     reportsStatus,
     reports,
-    description,
-    selectedPharmacyId,
+    draft,
     isSubmitting,
     isSubmitted,
     actionReportId,
     actionErrorMessage,
     errorMessage,
-    photoBytes,
   ];
 }
