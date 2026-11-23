@@ -10,8 +10,9 @@ final _namePattern = RegExp(r"^[\p{L}][\p{L} '\-]*$", unicode: true);
 final _letter = RegExp(r'[A-Za-z]');
 final _digit = RegExp(r'\d');
 
-/// Kenyan mobile numbers: 07XX / 01XX (10 digits) or +2547XX / +2541XX.
-final _kenyanPhone = RegExp(r'^(?:\+254|254|0)([17]\d{8})$');
+/// Rwandan mobile numbers: 07XX XXX XXX (10 digits) or +2507XX… / 2507XX…
+/// Covers MTN (078/079) and Airtel (072/073).
+final _rwandanPhone = RegExp(r'^(?:\+250|250|0)(7\d{8})$');
 
 /// Minimum password length for new accounts.
 const minPasswordLength = 8;
@@ -55,17 +56,17 @@ String? validateLoginPassword(String? value) =>
 String? validatePhone(String? value) {
   final phone = value?.trim() ?? '';
   if (phone.isEmpty) return 'Enter your phone number.';
-  if (normalizeKenyanPhone(phone) == null) {
-    return 'Enter a Kenyan mobile number, like 0712 345 678.';
+  if (normalizeRwandanPhone(phone) == null) {
+    return 'Enter a Rwandan mobile number, like 0788 123 456.';
   }
   return null;
 }
 
-/// Turns any accepted format ("0712 345 678", "+254-712-345678", ...) into
-/// `+254712345678`, the format saved in Firestore. Returns `null` if the
-/// number isn't a valid Kenyan mobile number.
-String? normalizeKenyanPhone(String value) {
+/// Turns any accepted format ("0788 123 456", "+250-788-123456", ...) into
+/// `+250788123456`, the format saved in Firestore. Returns `null` if the
+/// number isn't a valid Rwandan mobile number.
+String? normalizeRwandanPhone(String value) {
   final compact = value.replaceAll(RegExp(r'[\s\-()]'), '');
-  final match = _kenyanPhone.firstMatch(compact);
-  return match == null ? null : '+254${match.group(1)}';
+  final match = _rwandanPhone.firstMatch(compact);
+  return match == null ? null : '+250${match.group(1)}';
 }

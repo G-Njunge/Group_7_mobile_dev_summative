@@ -21,7 +21,7 @@ class EditProfileFormCubit extends Cubit<EditProfileFormState> {
 
   /// Checks both fields, shows any errors, and returns true if all is fine.
   /// Phone is optional (Google users have none), but if it is typed it must
-  /// be a valid Kenyan number, using the same rules as Register.
+  /// be a valid Rwandan number, using the same rules as Register.
   bool validate({required String fullName, required String phone}) {
     final next = EditProfileFormState(
       nameError: validateFullName(fullName),

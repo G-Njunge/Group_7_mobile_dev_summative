@@ -1,10 +1,10 @@
 {
   "_note": "Demo data for development and the demo video. Registration numbers, GTINs (restricted-circulation prefix 2) and phone numbers are fictional.",
   "medicines": [
-    { "medicineId": "med_panadol_advance_500", "name": "Panadol Advance 500mg", "manufacturer": "GSK Kenya Ltd", "ppbRegNo": "PPB/DEMO/0001", "dosageForm": "tablet", "strength": "500mg" },
-    { "medicineId": "med_coartem_80_480", "name": "Coartem 80/480", "manufacturer": "Novartis", "ppbRegNo": "PPB/DEMO/0002", "dosageForm": "tablet", "strength": "80mg/480mg" },
-    { "medicineId": "med_amoxil_250", "name": "Amoxil 250mg", "manufacturer": "GSK Kenya Ltd", "ppbRegNo": "PPB/DEMO/0003", "dosageForm": "capsule", "strength": "250mg" },
-    { "medicineId": "med_zinnat_500", "name": "Zinnat 500mg", "manufacturer": "GSK Kenya Ltd", "ppbRegNo": "PPB/DEMO/0004", "dosageForm": "tablet", "strength": "500mg" }
+    { "medicineId": "med_panadol_advance_500", "name": "Panadol Advance 500mg", "manufacturer": "GSK", "ppbRegNo": "RwandaFDA/DEMO/0001", "dosageForm": "tablet", "strength": "500mg" },
+    { "medicineId": "med_coartem_80_480", "name": "Coartem 80/480", "manufacturer": "Novartis", "ppbRegNo": "RwandaFDA/DEMO/0002", "dosageForm": "tablet", "strength": "80mg/480mg" },
+    { "medicineId": "med_amoxil_250", "name": "Amoxil 250mg", "manufacturer": "GSK", "ppbRegNo": "RwandaFDA/DEMO/0003", "dosageForm": "capsule", "strength": "250mg" },
+    { "medicineId": "med_zinnat_500", "name": "Zinnat 500mg", "manufacturer": "GSK", "ppbRegNo": "RwandaFDA/DEMO/0004", "dosageForm": "tablet", "strength": "500mg" }
   ],
   "batches": [
     { "batchId": "bat_pa24_1150", "medicineId": "med_panadol_advance_500", "batchNumber": "PA24-1150", "gtin": "2000000000015", "expiryDate": "2027-08-31", "status": "valid" },
@@ -15,8 +15,8 @@
     { "batchId": "bat_zn23_0098", "medicineId": "med_zinnat_500", "batchNumber": "ZN23-0098", "gtin": "2000000000060", "expiryDate": "2025-06-30", "status": "valid" }
   ],
   "pharmacies": [
-    { "pharmacyId": "ph_goodlife_westlands", "name": "Goodlife Pharmacy", "licenseNo": "DEMO-LIC-001", "address": "Westlands Square, Ring Rd", "lat": -1.2655, "lng": 36.8030, "phone": "+254700000001", "verified": true },
-    { "pharmacyId": "ph_haltons_kimathi", "name": "Haltons Pharmacy", "licenseNo": "DEMO-LIC-002", "address": "Kimathi Street, CBD", "lat": -1.2833, "lng": 36.8235, "phone": "+254700000002", "verified": true },
-    { "pharmacyId": "ph_pharmax_ngong", "name": "Pharmax Chemist", "licenseNo": "DEMO-LIC-003", "address": "Ngong Road, Adams Arcade", "lat": -1.3005, "lng": 36.7790, "phone": "+254700000003", "verified": true }
+    { "pharmacyId": "ph_kigali_central", "name": "Kigali Central Pharmacy", "licenseNo": "DEMO-LIC-001", "address": "KN 4 Ave, Nyarugenge, Kigali", "lat": -1.9499, "lng": 30.0588, "phone": "+250788000001", "verified": true },
+    { "pharmacyId": "ph_remera_health", "name": "Remera Health Pharmacy", "licenseNo": "DEMO-LIC-002", "address": "KG 11 Ave, Remera, Kigali", "lat": -1.9578, "lng": 30.1127, "phone": "+250788000002", "verified": true },
+    { "pharmacyId": "ph_kimironko_chemist", "name": "Kimironko Chemist", "licenseNo": "DEMO-LIC-003", "address": "KG 202 St, Kimironko, Kigali", "lat": -1.9360, "lng": 30.1265, "phone": "+250788000003", "verified": true }
   ]
 }
