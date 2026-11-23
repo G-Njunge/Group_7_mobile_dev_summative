@@ -51,6 +51,10 @@ void main() {
       200,
       scrollable: find.byType(Scrollable).last,
     );
+    // scrollUntilVisible stops as soon as the row peeks in at the edge;
+    // bring it fully on screen so the tap lands on it.
+    await tester.ensureVisible(row);
+    await tester.pumpAndSettle();
     await tester.tap(row);
     await tester.pumpAndSettle();
   }
@@ -71,6 +75,7 @@ void main() {
       'Dark',
       'English',
       'Kiswahili',
+      'Ikinyarwanda',
       'Scan sound',
       'Vibration',
       'Save scan history',
@@ -106,8 +111,7 @@ void main() {
     when(() => repo.save(any())).thenThrow(const SettingsSaveException());
     await pumpSettings(tester);
 
-    await tester.tap(find.text('Vibration'));
-    await tester.pump();
+    await tapRow(tester, 'Vibration');
 
     expect(
       find.text("We couldn't save that setting. Please try again."),
@@ -121,6 +125,27 @@ void main() {
 
     expect(find.text('Mipangilio'), findsOneWidget);
     expect(find.text('Mandhari'), findsOneWidget);
+  });
+
+  testWidgets('choosing Ikinyarwanda updates and saves the language', (
+    tester,
+  ) async {
+    await pumpSettings(tester);
+
+    await tapRow(tester, 'Ikinyarwanda');
+
+    expect(cubit.state.settings.language, AppLanguage.kinyarwanda);
+    verify(
+      () => repo.save(const AppSettings(language: AppLanguage.kinyarwanda)),
+    ).called(1);
+  });
+
+  testWidgets('renders in Kinyarwanda', (tester) async {
+    await pumpSettings(tester, locale: const Locale('rw'));
+
+    expect(find.text('Igenamiterere'), findsOneWidget);
+    expect(find.text('Ururimi'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('fits a small phone in landscape without overflow', (
