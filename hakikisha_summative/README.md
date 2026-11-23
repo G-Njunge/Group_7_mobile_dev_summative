@@ -152,7 +152,7 @@ These field names are the contract. Use them exactly in models, security rules a
 | Collection | Fields (PK, FK) | Access |
 |---|---|---|
 | `users` | **uid (PK)**, fullName, email, phone, authProvider (`password` / `google`), photoUrl, createdAt | Owner only |
-| `medicines` | **medicineId (PK)**, name, manufacturer, ppbRegNo, dosageForm, strength | Signed-in read, no client write |
+| `medicines` | **medicineId (PK)**, name, manufacturer, registrationNo, dosageForm, strength | Signed-in read, no client write |
 | `batches` | **batchId (PK)**, *medicineId (FK)*, batchNumber, gtin, expiryDate, status (`valid` / `recalled` / `counterfeit`) | Signed-in read, no client write |
 | `scans` | **scanId (PK)**, *userId (FK)*, *batchId (FK, null if not found)*, result (`genuine` / `flagged` / `notFound`), method (`camera` / `manual` / `upload`), scannedAt | Create / read / delete own; no update |
 | `reports` | **reportId (PK)**, *userId (FK)*, *scanId (FK, optional)*, *pharmacyId (FK, optional)*, description, photoUrls, status (`pending` / `reviewed`), createdAt, updatedAt | Own only; update / delete while pending |
