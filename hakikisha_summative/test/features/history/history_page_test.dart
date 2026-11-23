@@ -78,16 +78,17 @@ void main() {
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
   });
 
-  testWidgets('shows the empty message when there are no scans', (
-    tester,
-  ) async {
-    final repo = await _pumpPage(tester);
+  testWidgets(
+    'shows the empty message when there are no scans',
+    (tester) async {
+      final repo = await _pumpPage(tester);
 
-    repo.controller.add([]);
-    await _settle(tester);
+      repo.controller.add([]);
+      await _settle(tester);
 
-    expect(find.text('No scans to show yet.'), findsOneWidget);
-  });
+      expect(find.text('No scans to show yet.'), findsOneWidget);
+    },
+  );
 
   testWidgets('shows each medicine name and the total count', (tester) async {
     final repo = await _pumpPage(tester);
