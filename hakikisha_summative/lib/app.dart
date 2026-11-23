@@ -10,9 +10,6 @@ import 'features/settings/presentation/bloc/settings_cubit.dart';
 
 /// Root widget. Provides the app-wide cubits and rebuilds the [MaterialApp]
 /// only when the theme or language setting changes.
-///
-/// Everything is passed in rather than created here, so widget tests can
-/// pump the real app with fakes.
 class HakikishaApp extends StatelessWidget {
   const HakikishaApp({
     super.key,
@@ -41,7 +38,6 @@ class HakikishaApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           theme: AppTheme.light,
           darkTheme: AppTheme.dark,
-          // ThemePreference mirrors ThemeMode's names one-to-one.
           themeMode: ThemeMode.values.byName(state.settings.theme.name),
           locale: Locale(state.settings.language.code),
           localizationsDelegates: appLocalizationsDelegates,

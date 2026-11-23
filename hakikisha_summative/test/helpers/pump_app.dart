@@ -53,8 +53,6 @@ extension PumpApp on WidgetTester {
     Locale locale = const Locale('en'),
     bool settle = true,
   }) async {
-    // The Scaffold gives bare widgets (fields, buttons) a Material ancestor
-    // and a place for snackbars; full pages bring their own and nest fine.
     final router = GoRouter(
       routes: [
         GoRoute(
