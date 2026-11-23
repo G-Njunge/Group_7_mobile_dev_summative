@@ -94,6 +94,7 @@ service cloud.firestore {
             ['reportId', 'scanId', 'pharmacyId'])
           && data().get('reportId', reportId) == reportId
           && isText(data().description, 1, 2000)
+          && data().description.matches('.*\\S.*')
           && data().photoUrls is list
           && data().photoUrls.size() <= 3
           && isOptionalText(data().get('scanId', null), 128)

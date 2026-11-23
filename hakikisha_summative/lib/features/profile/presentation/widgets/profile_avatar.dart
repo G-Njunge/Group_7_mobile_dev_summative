@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../auth/presentation/widgets/auth_colors.dart';
+import '../../../../core/theme/app_palette.dart';
 
 /// Shows the profile photo, or the person's initials if there is none.
 class ProfileAvatar extends StatelessWidget {
@@ -21,8 +21,8 @@ class ProfileAvatar extends StatelessWidget {
 
     return CircleAvatar(
       radius: radius,
-      backgroundColor: AuthColors.primary,
-      foregroundColor: Colors.white,
+      backgroundColor: context.palette.brand,
+      foregroundColor: context.palette.onBrand,
       backgroundImage: hasPhoto ? NetworkImage(photoUrl!) : null,
       child: hasPhoto
           ? null
