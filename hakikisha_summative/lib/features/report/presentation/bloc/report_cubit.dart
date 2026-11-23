@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -80,6 +81,23 @@ class ReportCubit extends Cubit<ReportState> {
     ),
   );
 
+  void setPhotos(List<Uint8List> photoBytes) {
+    if (photoBytes.length > 3) {
+      photoBytes = photoBytes.take(3).toList();
+    }
+    emit(state.copyWith(photoBytes: photoBytes, clearErrorMessage: true));
+  }
+
+  void removePhoto(int index) {
+    if (index < 0 || index >= state.photoBytes.length) return;
+    emit(
+      state.copyWith(
+        photoBytes: List<Uint8List>.of(state.photoBytes)..removeAt(index),
+        clearErrorMessage: true,
+      ),
+    );
+  }
+
   Future<void> submit({required String userId}) async {
     if (state.isSubmitting || state.isSubmitted) return;
 
@@ -109,6 +127,7 @@ class ReportCubit extends Cubit<ReportState> {
         userId: userId,
         pharmacyId: pharmacyId,
         description: description,
+        photoBytes: state.photoBytes,
       );
       emit(state.copyWith(isSubmitting: false, isSubmitted: true));
     } on Object {

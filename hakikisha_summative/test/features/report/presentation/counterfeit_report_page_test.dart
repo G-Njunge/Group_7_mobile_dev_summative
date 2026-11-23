@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 // ignore: deprecated_member_use
 import 'package:flutter/material.dart';
@@ -30,6 +31,7 @@ class _FakeReportRepository implements ReportRepository {
     required String userId,
     required String pharmacyId,
     required String description,
+    List<Uint8List> photoBytes = const [],
   }) async {
     creates++;
   }
