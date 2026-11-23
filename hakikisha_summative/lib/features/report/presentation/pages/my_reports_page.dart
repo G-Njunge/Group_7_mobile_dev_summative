@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 
+import '../../../../core/widgets/app_drawer.dart';
 import '../../../pharmacy/domain/entities/pharmacy_entity.dart';
 import '../../domain/entities/report_entity.dart';
 import '../bloc/report_cubit.dart';
@@ -49,6 +50,8 @@ class _MyReportsViewState extends State<_MyReportsView> {
         ..showSnackBar(SnackBar(content: Text(state.actionErrorMessage!)));
     },
     builder: (context, state) => Scaffold(
+      // Opened from the report form it's pushed, so it shows a back arrow.
+      drawer: Navigator.of(context).canPop() ? null : const AppDrawer(),
       appBar: AppBar(title: const Text('My reports')),
       body: switch (state.reportsStatus) {
         MyReportsStatus.loading => const Center(

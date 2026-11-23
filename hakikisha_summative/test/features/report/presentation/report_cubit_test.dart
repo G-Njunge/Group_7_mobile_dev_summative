@@ -69,10 +69,10 @@ void main() {
     pharmacyId: 'pharmacy-1',
     name: 'Central Pharmacy',
     licenseNo: 'PPB-001',
-    address: 'Westlands, Nairobi',
+    address: 'Nyarugenge, Kigali',
     latitude: -1.267,
     longitude: 36.81,
-    phone: '+254700000001',
+    phone: '+250788000001',
     verified: true,
   );
   const pendingReport = ReportEntity(

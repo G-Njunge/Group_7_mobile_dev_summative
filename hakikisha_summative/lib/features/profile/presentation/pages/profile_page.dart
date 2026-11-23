@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../auth/presentation/widgets/auth_buttons.dart';
-import '../../../auth/presentation/widgets/auth_colors.dart';
-import '../../../auth/presentation/widgets/neumorphic.dart';
+import '../../../../core/l10n/generated/app_localizations.dart';
+import '../../../../core/theme/app_palette.dart';
+import '../../../../core/widgets/app_buttons.dart';
+import '../../../../core/widgets/app_scaffold.dart';
+import '../../../../core/widgets/neumorphic.dart';
 import '../../domain/entities/profile_entity.dart';
 import '../bloc/profile_cubit.dart';
 import '../bloc/profile_state.dart';
-import '../widgets/delete_account_dialog.dart';
 import '../widgets/profile_avatar.dart';
 import 'edit_profile_page.dart';
 
@@ -16,45 +17,23 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
-      body: BlocConsumer<ProfileCubit, ProfileState>(
-        listenWhen: (previous, current) => previous.status != current.status,
-        listener: (context, state) {
-          final messenger = ScaffoldMessenger.of(context);
-          if (state.status == ProfileStatus.deleted) {
-            messenger.showSnackBar(
-              const SnackBar(content: Text('Your account was deleted.')),
-            );
-          } else if (state.status == ProfileStatus.error &&
-              state.profile != null) {
-            messenger.showSnackBar(
-              SnackBar(
-                content: Text(state.errorMessage ?? 'Something went wrong.'),
+    final l10n = AppLocalizations.of(context);
+
+    return AppScaffold(
+      title: l10n.navProfile,
+      body: BlocBuilder<ProfileCubit, ProfileState>(
+        builder: (context, state) {
+          final profile = state.profile;
+          if (profile != null) return _ProfileBody(profile: profile);
+          if (state.status == ProfileStatus.error) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text(l10n.profileLoadError, textAlign: TextAlign.center),
               ),
             );
           }
-        },
-        builder: (context, state) {
-          final profile = state.profile;
-          if (profile == null) {
-            if (state.status == ProfileStatus.error) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Text(
-                    state.errorMessage ?? 'Something went wrong.',
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              );
-            }
-            return const Center(child: CircularProgressIndicator());
-          }
-          return _ProfileBody(
-            profile: profile,
-            busy: state.status == ProfileStatus.deleting,
-          );
+          return const Center(child: CircularProgressIndicator());
         },
       ),
     );
@@ -62,21 +41,11 @@ class ProfilePage extends StatelessWidget {
 }
 
 class _ProfileBody extends StatelessWidget {
+  const _ProfileBody({required this.profile});
+
   final ProfileEntity profile;
-  final bool busy;
-
-  const _ProfileBody({required this.profile, required this.busy});
-
-  Future<void> _confirmDelete(BuildContext context) async {
-    if (busy) return;
-    final confirmed = await showDeleteAccountDialog(context);
-    if (confirmed && context.mounted) {
-      context.read<ProfileCubit>().deleteAccount();
-    }
-  }
 
   void _openEdit(BuildContext context) {
-    if (busy) return;
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => BlocProvider.value(
@@ -89,10 +58,12 @@ class _ProfileBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
+    final palette = context.palette;
+    final isGoogle = profile.authProvider.toLowerCase().contains('google');
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       child: Column(
         children: [
           ProfileAvatar(name: profile.fullName, photoUrl: profile.photoUrl),
@@ -100,39 +71,35 @@ class _ProfileBody extends StatelessWidget {
           Text(
             profile.fullName,
             textAlign: TextAlign.center,
-            style: theme.textTheme.headlineSmall?.copyWith(
-              color: AuthColors.primary,
-              fontWeight: FontWeight.w800,
-            ),
+            style: Theme.of(context).textTheme.headlineSmall
+                ?.copyWith(color: palette.heading, fontWeight: FontWeight.w800),
           ),
-          Text(
-            profile.email,
-            style: const TextStyle(color: AuthColors.textMuted),
-          ),
+          const SizedBox(height: 4),
+          Text(profile.email, style: TextStyle(color: palette.textMuted)),
           const SizedBox(height: 24),
-          Container(
+          SizedBox(
             width: double.infinity,
-            padding: const EdgeInsets.all(20),
-            decoration: Neu.raisedBox(radius: 20, distance: 6, blur: 16),
-            child: Column(
-              children: [
-                _InfoRow(label: 'Phone', value: profile.phone ?? 'Not set'),
-                _InfoRow(
-                  label: 'Signed in with',
-                  value: signInMethodLabel(profile.authProvider),
-                ),
-              ],
+            child: NeuCard(
+              child: Column(
+                children: [
+                  _InfoRow(
+                    label: l10n.profilePhone,
+                    value: profile.phone ?? l10n.profileNotSet,
+                  ),
+                  _InfoRow(
+                    label: l10n.profileSignedInWith,
+                    value: isGoogle
+                        ? l10n.profileSignInGoogle
+                        : l10n.profileSignInPassword,
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 24),
           PrimaryButton(
-            label: 'Edit profile',
+            label: l10n.profileEdit,
             onPressed: () => _openEdit(context),
-          ),
-          const SizedBox(height: 12),
-          SecondaryButton(
-            label: busy ? 'Deleting…' : 'Delete account',
-            onPressed: () => _confirmDelete(context),
           ),
         ],
       ),
@@ -141,10 +108,10 @@ class _ProfileBody extends StatelessWidget {
 }
 
 class _InfoRow extends StatelessWidget {
+  const _InfoRow({required this.label, required this.value});
+
   final String label;
   final String value;
-
-  const _InfoRow({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -157,7 +124,7 @@ class _InfoRow extends StatelessWidget {
             flex: 2,
             child: Text(
               label,
-              style: const TextStyle(color: AuthColors.textMuted),
+              style: TextStyle(color: context.palette.textMuted),
             ),
           ),
           Expanded(flex: 3, child: Text(value)),
@@ -166,8 +133,3 @@ class _InfoRow extends StatelessWidget {
     );
   }
 }
-
-String signInMethodLabel(String authProvider) =>
-    authProvider.toLowerCase().contains('google')
-    ? 'Google'
-    : 'Email and password';

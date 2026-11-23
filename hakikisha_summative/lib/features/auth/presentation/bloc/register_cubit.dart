@@ -46,7 +46,7 @@ class RegisterState extends Equatable {
 }
 
 /// Register form. On success the new (unverified) user arrives through the
-/// AuthBloc's stream and the AuthGate shows Verify email.
+/// AuthBloc's stream and the router shows Verify email.
 class RegisterCubit extends Cubit<RegisterState> {
   RegisterCubit(this._repository) : super(const RegisterState());
 

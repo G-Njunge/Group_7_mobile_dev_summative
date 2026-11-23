@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/widgets/app_drawer.dart';
 import '../bloc/history_cubit.dart';
 import '../bloc/history_state.dart';
 import '../widgets/history_stats.dart';
@@ -14,6 +15,7 @@ class HistoryPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const AppDrawer(),
       appBar: AppBar(title: const Text('Scan history')),
       body: BlocBuilder<HistoryCubit, HistoryState>(
         builder: (context, state) {

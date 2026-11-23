@@ -41,7 +41,7 @@ void main() {
     uid: 'u1',
     fullName: 'Amina Wanjiru',
     email: 'amina@example.com',
-    phone: '+254712345678',
+    phone: '+250788123456',
     authProvider: 'password',
     createdAt: DateTime(2026, 11, 1),
   );
@@ -77,10 +77,10 @@ void main() {
   );
 
   test('updateProfile saves the trimmed name and a normalised phone', () async {
-    await cubit.updateProfile(fullName: '  Amina W  ', phone: '0700 000 000');
+    await cubit.updateProfile(fullName: '  Amina W  ', phone: '0788 000 000');
 
     expect(repo.savedName, 'Amina W');
-    expect(repo.savedPhone, '+254700000000');
+    expect(repo.savedPhone, '+250788000000');
     expect(cubit.state.status, ProfileStatus.saved);
   });
 

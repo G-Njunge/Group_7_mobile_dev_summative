@@ -26,7 +26,7 @@ class LoginState extends Equatable {
 }
 
 /// Login form. On success the AuthBloc's stream picks up the signed-in user
-/// and the AuthGate moves on, so this cubit doesn't navigate.
+/// and the router moves on, so this cubit doesn't navigate.
 class LoginCubit extends Cubit<LoginState> {
   LoginCubit(this._repository) : super(const LoginState());
 
@@ -59,7 +59,7 @@ class LoginCubit extends Cubit<LoginState> {
     emit(const LoginState(status: FormStatus.submitting));
     try {
       await _repository.logIn(email: email, password: password);
-      // The page may already be gone (the AuthGate swapped screens).
+      // The page may already be gone (the router swapped screens).
       if (!isClosed) emit(const LoginState(status: FormStatus.success));
     } on AuthFailure catch (failure) {
       if (!isClosed) {

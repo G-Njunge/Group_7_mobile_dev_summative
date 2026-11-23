@@ -13,6 +13,8 @@ import 'package:hakikisha_summative/features/auth/auth_injection.dart';
 import 'package:hakikisha_summative/features/auth/domain/entities/app_user.dart';
 import 'package:hakikisha_summative/features/auth/domain/repositories/auth_repository.dart';
 import 'package:hakikisha_summative/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:hakikisha_summative/features/history/domain/repositories/history_repository.dart';
+import 'package:hakikisha_summative/features/history/presentation/bloc/history_cubit.dart';
 import 'package:hakikisha_summative/features/settings/data/repositories/settings_repository_impl.dart';
 import 'package:hakikisha_summative/features/settings/domain/entities/app_settings.dart';
 import 'package:hakikisha_summative/features/settings/presentation/bloc/settings_cubit.dart';
@@ -22,6 +24,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'helpers/pump_app.dart';
 
 class MockAuthRepository extends Mock implements AuthRepository {}
+
+class MockHistoryRepository extends Mock implements HistoryRepository {}
 
 /// Whole-app tests: real router, redirect, drawer, auth screens, settings
 /// and SharedPreferences, with only Firebase replaced by [FakeSessionSource]
@@ -62,6 +66,8 @@ void main() {
 
     await tester.pumpWidget(
       BlocProvider(
+        // Created up front like in main.dart, where a listener reads it.
+        lazy: false,
         create: (_) =>
             AuthBloc(repository)..add(const AuthSubscriptionRequested()),
         child: HakikishaApp(
@@ -137,13 +143,23 @@ void main() {
   });
 
   testWidgets('the drawer navigates between sections', (tester) async {
+    final history = MockHistoryRepository();
+    when(() => history.watchScans('u')).thenAnswer((_) => Stream.value([]));
+    GetIt.instance.registerFactory(() => HistoryCubit(history));
+
     await launch(tester);
+    authChanges.add(
+      const AppUser(uid: 'u', email: 'amina@gmail.com', emailVerified: true),
+    );
+    await tester.pumpAndSettle();
 
     await openDrawerItem(tester, 'Settings');
     expect(find.text('APPEARANCE'), findsOneWidget);
 
+    // The real History page, loaded for the signed-in user.
     await openDrawerItem(tester, 'Scan history');
-    expect(find.text('Scan history'), findsOneWidget);
+    expect(find.text('No scans to show yet.'), findsOneWidget);
+    verify(() => history.watchScans('u')).called(1);
   });
 
   testWidgets('log out asks first, then returns to the landing screen', (

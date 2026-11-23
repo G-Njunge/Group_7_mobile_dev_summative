@@ -78,12 +78,12 @@ class _PharmacyMapViewState extends State<_PharmacyMapView> {
       _lastCurrentLocation = state.currentLocation;
     },
     builder: (context, state) => Scaffold(
-      drawer: const AppDrawer(),
       appBar: AppBar(
         title: const Text('Pharmacy map'),
         backgroundColor: AuthColors.surface,
         surfaceTintColor: Colors.transparent,
       ),
+      drawer: const AppDrawer(),
       body: ColoredBox(
         color: AuthColors.surface,
         child: SafeArea(
@@ -281,7 +281,7 @@ class _PharmacyMapViewState extends State<_PharmacyMapView> {
   Widget _buildMap(PharmacyMapState state) => FlutterMap(
     mapController: _mapController,
     options: const MapOptions(
-      initialCenter: LatLng(-1.286389, 36.817223),
+      initialCenter: LatLng(-1.9441, 30.0619),
       initialZoom: 11,
     ),
     children: [

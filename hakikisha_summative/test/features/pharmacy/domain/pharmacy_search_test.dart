@@ -8,10 +8,10 @@ void main() {
     pharmacyId: 'near',
     name: 'Central Pharmacy',
     licenseNo: 'PPB-001',
-    address: 'Westlands, Nairobi',
+    address: 'Nyarugenge, Kigali',
     latitude: -1.267,
     longitude: 36.81,
-    phone: '+254700000001',
+    phone: '+250788000001',
     verified: true,
   );
   const pharmacyFar = PharmacyEntity(
@@ -21,7 +21,7 @@ void main() {
     address: 'Mombasa',
     latitude: -4.0435,
     longitude: 39.6682,
-    phone: '+254700000002',
+    phone: '+250788000002',
     verified: false,
   );
 
@@ -37,7 +37,7 @@ void main() {
       expect(PharmacySearch.filter(pharmacies, 'mombasa').single, pharmacyFar);
       expect(PharmacySearch.filter(pharmacies, 'ppb-002').single, pharmacyFar);
       expect(
-        PharmacySearch.filter(pharmacies, '+254700000002').single,
+        PharmacySearch.filter(pharmacies, '+250788000002').single,
         pharmacyFar,
       );
     },

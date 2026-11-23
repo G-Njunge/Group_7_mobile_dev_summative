@@ -100,4 +100,42 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get placeholderBody => 'This screen is being built.';
+
+  @override
+  String get profileLoadError =>
+      'We couldn\'t load your profile. Please try again.';
+
+  @override
+  String get profilePhone => 'Phone';
+
+  @override
+  String get profileNotSet => 'Not set';
+
+  @override
+  String get profileSignedInWith => 'Signed in with';
+
+  @override
+  String get profileSignInGoogle => 'Google';
+
+  @override
+  String get profileSignInPassword => 'Email and password';
+
+  @override
+  String get profileEdit => 'Edit profile';
+
+  @override
+  String get profileSaved => 'Profile updated.';
+
+  @override
+  String get profileSaveError =>
+      'We couldn\'t save your changes. Please try again.';
+
+  @override
+  String get profileFullName => 'Full name';
+
+  @override
+  String get profileEmail => 'Email';
+
+  @override
+  String get profileSaveChanges => 'Save changes';
 }

@@ -7,20 +7,20 @@ void main() {
       'pharmacyId': 'pharmacy-1',
       'name': 'Central Pharmacy',
       'licenseNo': 'PPB-001',
-      'address': 'Westlands, Nairobi',
+      'address': 'Nyarugenge, Kigali',
       'lat': -1.267,
       'lng': 36.81,
-      'phone': '+254700000001',
+      'phone': '+250788000001',
       'verified': true,
     }, documentId: 'document-1');
 
     expect(pharmacy.pharmacyId, 'pharmacy-1');
     expect(pharmacy.name, 'Central Pharmacy');
     expect(pharmacy.licenseNo, 'PPB-001');
-    expect(pharmacy.address, 'Westlands, Nairobi');
+    expect(pharmacy.address, 'Nyarugenge, Kigali');
     expect(pharmacy.latitude, -1.267);
     expect(pharmacy.longitude, 36.81);
-    expect(pharmacy.phone, '+254700000001');
+    expect(pharmacy.phone, '+250788000001');
     expect(pharmacy.verified, isTrue);
   });
 
@@ -28,10 +28,10 @@ void main() {
     final pharmacy = PharmacyModel.fromJson({
       'name': 'Central Pharmacy',
       'licenseNo': 'PPB-001',
-      'address': 'Westlands, Nairobi',
+      'address': 'Nyarugenge, Kigali',
       'lat': -1.267,
       'lng': 36.81,
-      'phone': '+254700000001',
+      'phone': '+250788000001',
       'verified': true,
     }, documentId: 'pharmacy-document');
 
@@ -52,10 +52,10 @@ void main() {
       () => PharmacyModel.fromJson({
         'name': 'Central Pharmacy',
         'licenseNo': 'PPB-001',
-        'address': 'Westlands, Nairobi',
+        'address': 'Nyarugenge, Kigali',
         'lat': 91,
         'lng': 36.81,
-        'phone': '+254700000001',
+        'phone': '+250788000001',
         'verified': true,
       }, documentId: 'pharmacy-document'),
       throwsFormatException,

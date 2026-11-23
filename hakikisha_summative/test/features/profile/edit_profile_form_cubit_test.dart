@@ -21,7 +21,7 @@ void main() {
     expect(cubit.state.phoneError, isNull);
   });
 
-  test('a phone that is not a Kenyan mobile number is rejected', () {
+  test('a phone that is not a Rwandan mobile number is rejected', () {
     final ok = cubit.validate(fullName: 'Amina Wanjiru', phone: 'abc123');
 
     expect(ok, isFalse);
