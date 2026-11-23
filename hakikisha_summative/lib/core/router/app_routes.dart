@@ -25,6 +25,26 @@ abstract final class AppRoutes {
   /// Screens of the auth flow itself, never a valid place for a signed-in user.
   static const _authFlow = [...publicRoutes, splash, verifyEmail];
 
+  /// Query parameters that prefill the report form.
+  static const reportMedicineParam = 'medicine';
+  static const reportBatchParam = 'batch';
+
+  /// The report form, prefilled with what a scan found. Blank values are left
+  /// out so the link stays clean.
+  static String reportFor({String? medicineName, String? batchNumber}) {
+    final params = {
+      reportMedicineParam: ?_blankToNull(medicineName),
+      reportBatchParam: ?_blankToNull(batchNumber),
+    };
+    return Uri(
+      path: report,
+      queryParameters: params.isEmpty ? null : params,
+    ).toString();
+  }
+
+  static String? _blankToNull(String? value) =>
+      value == null || value.trim().isEmpty ? null : value.trim();
+
   static bool isPublic(String location) => _matchesAny(location, publicRoutes);
 
   static bool _matchesAny(String location, List<String> roots) =>

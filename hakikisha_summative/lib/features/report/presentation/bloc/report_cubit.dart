@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -9,6 +8,7 @@ import '../../domain/entities/report_entity.dart';
 import '../../domain/repositories/report_repository.dart';
 import 'report_state.dart';
 
+/// Report a medicine (create) and My reports (read, edit, withdraw).
 class ReportCubit extends Cubit<ReportState> {
   ReportCubit(this._reportRepository, this._pharmacyRepository)
     : super(const ReportState());
@@ -18,38 +18,39 @@ class ReportCubit extends Cubit<ReportState> {
   StreamSubscription<List<PharmacyEntity>>? _pharmacySubscription;
   StreamSubscription<List<ReportEntity>>? _reportsSubscription;
 
-  Future<void> start({required String userId}) async {
-    await Future.wait([
-      _pharmacySubscription?.cancel() ?? Future<void>.value(),
-      _reportsSubscription?.cancel() ?? Future<void>.value(),
-    ]);
+  /// Starts listening to pharmacies and the user's reports. [prefill] fills
+  /// the form, e.g. with the medicine and batch from a scan result.
+  Future<void> start({required String userId, ReportDraft? prefill}) async {
+    // Applied before the first await, so the form's first frame already shows
+    // the prefilled medicine and batch.
     emit(
       state.copyWith(
         pharmacyStatus: ReportPharmacyStatus.loading,
         reportsStatus: MyReportsStatus.loading,
+        draft: prefill ?? state.draft,
         clearErrorMessage: true,
       ),
     );
+    await _cancelSubscriptions();
     _pharmacySubscription = _pharmacyRepository.watchPharmacies().listen(
       (pharmacies) {
-        final selectedPharmacyExists = pharmacies.any(
-          (pharmacy) => pharmacy.pharmacyId == state.selectedPharmacyId,
-        );
+        // Drop a selected pharmacy that no longer exists.
+        final selected = state.draft.pharmacyId;
+        final stillListed = pharmacies.any((p) => p.pharmacyId == selected);
         emit(
           state.copyWith(
             pharmacyStatus: ReportPharmacyStatus.loaded,
             pharmacies: pharmacies,
-            clearSelectedPharmacyId: !selectedPharmacyExists,
-            clearErrorMessage: true,
+            draft: stillListed
+                ? null
+                : state.draft.copyWith(clearPharmacyId: true),
           ),
         );
       },
-      onError: (Object _) => emit(
-        state.copyWith(
-          pharmacyStatus: ReportPharmacyStatus.error,
-          errorMessage: 'Could not load pharmacies. Please try again.',
-        ),
-      ),
+      // A missing pharmacy list never blocks a report: the user can type
+      // where they bought the medicine instead.
+      onError: (Object _) =>
+          emit(state.copyWith(pharmacyStatus: ReportPharmacyStatus.error)),
     );
     _reportsSubscription = _reportRepository
         .watchMyReports(userId)
@@ -58,145 +59,79 @@ class ReportCubit extends Cubit<ReportState> {
             state.copyWith(
               reportsStatus: MyReportsStatus.loaded,
               reports: reports,
-              clearErrorMessage: true,
             ),
           ),
           onError: (Object _) => emit(
             state.copyWith(
               reportsStatus: MyReportsStatus.error,
-              errorMessage: 'Could not load your reports. Please try again.',
+              errorMessage: "We couldn't load your reports. Please try again.",
             ),
           ),
         );
   }
 
-  void setDescription(String description) =>
-      emit(state.copyWith(description: description, clearErrorMessage: true));
-
-  void selectPharmacy(String? pharmacyId) => emit(
-    state.copyWith(
-      selectedPharmacyId: pharmacyId,
-      clearSelectedPharmacyId: pharmacyId == null,
-      clearErrorMessage: true,
-    ),
-  );
-
-  void setPhotos(List<Uint8List> photoBytes) {
-    if (photoBytes.length > 3) {
-      photoBytes = photoBytes.take(3).toList();
-    }
-    emit(state.copyWith(photoBytes: photoBytes, clearErrorMessage: true));
-  }
-
-  void removePhoto(int index) {
-    if (index < 0 || index >= state.photoBytes.length) return;
-    emit(
-      state.copyWith(
-        photoBytes: List<Uint8List>.of(state.photoBytes)..removeAt(index),
-        clearErrorMessage: true,
-      ),
-    );
-  }
+  /// Updates the form as the user types.
+  void updateDraft(ReportDraft draft) =>
+      emit(state.copyWith(draft: draft, clearErrorMessage: true));
 
   Future<void> submit({required String userId}) async {
     if (state.isSubmitting || state.isSubmitted) return;
-
-    final description = state.description.trim();
-    final pharmacyId = state.selectedPharmacyId;
-    if (description.isEmpty || description.length > 2000) {
-      emit(
-        state.copyWith(
-          errorMessage: description.isEmpty
-              ? 'Enter a description of the suspected counterfeit.'
-              : 'Description must be 2000 characters or fewer.',
-        ),
-      );
-      return;
-    }
-    if (pharmacyId == null ||
-        !state.pharmacies.any(
-          (pharmacy) => pharmacy.pharmacyId == pharmacyId,
-        )) {
-      emit(state.copyWith(errorMessage: 'Select a pharmacy.'));
+    final error = state.draft.validationError;
+    if (error != null) {
+      emit(state.copyWith(errorMessage: error));
       return;
     }
 
     emit(state.copyWith(isSubmitting: true, clearErrorMessage: true));
     try {
-      await _reportRepository.createCounterfeitReport(
-        userId: userId,
-        pharmacyId: pharmacyId,
-        description: description,
-        photoBytes: state.photoBytes,
-      );
+      await _reportRepository.createReport(userId: userId, draft: state.draft);
       emit(state.copyWith(isSubmitting: false, isSubmitted: true));
     } on Object {
       emit(
         state.copyWith(
           isSubmitting: false,
-          errorMessage: 'Could not submit the report. Please try again.',
+          errorMessage: "We couldn't send your report. Check your connection and try again.",
         ),
       );
     }
   }
 
+  /// Saves an edit to a pending report. Returns `true` when it was saved.
   Future<bool> updateReport({
     required ReportEntity report,
-    required String description,
-    required String pharmacyId,
+    required ReportDraft draft,
   }) async {
-    if (!_canEdit(report) || state.actionReportId != null) return false;
-    final trimmedDescription = description.trim();
-    if (trimmedDescription.isEmpty || trimmedDescription.length > 2000) {
-      emit(
-        state.copyWith(
-          actionErrorMessage: trimmedDescription.isEmpty
-              ? 'Enter a description.'
-              : 'Description must be 2000 characters or fewer.',
-          clearErrorMessage: true,
-        ),
-      );
+    if (!_canChange(report)) return false;
+    final error = draft.validationError;
+    if (error != null) {
+      emit(state.copyWith(actionErrorMessage: error));
       return false;
     }
-    if (!state.pharmacies.any(
-      (pharmacy) => pharmacy.pharmacyId == pharmacyId,
-    )) {
-      emit(
-        state.copyWith(
-          actionErrorMessage: 'Select a pharmacy.',
-          clearErrorMessage: true,
-        ),
-      );
-      return false;
-    }
-
-    emit(
-      state.copyWith(
-        actionReportId: report.reportId,
-        clearActionErrorMessage: true,
-      ),
-    );
-    try {
-      await _reportRepository.updatePendingReport(
+    return _runAction(
+      report,
+      () => _reportRepository.updatePendingReport(
         reportId: report.reportId,
-        pharmacyId: pharmacyId,
-        description: trimmedDescription,
-      );
-      emit(state.copyWith(clearActionReportId: true));
-      return true;
-    } on Object {
-      emit(
-        state.copyWith(
-          clearActionReportId: true,
-          actionErrorMessage: 'Could not update the report. Please try again.',
-        ),
-      );
-      return false;
-    }
+        draft: draft,
+      ),
+      failure: "We couldn't update the report. Please try again.",
+    );
   }
 
+  /// Withdraws (deletes) a pending report. Returns `true` when it was deleted.
   Future<bool> deleteReport(ReportEntity report) async {
-    if (!_canEdit(report) || state.actionReportId != null) return false;
+    if (!_canChange(report)) return false;
+    return _runAction(
+      report,
+      () => _reportRepository.deletePendingReport(report.reportId),
+      failure: "We couldn't withdraw the report. Please try again.",
+    );
+  }
+
+  Future<bool> _runAction(
+    ReportEntity report,
+    Future<void> Function() action, {
+    required String failure,
+  }) async {
     emit(
       state.copyWith(
         actionReportId: report.reportId,
@@ -204,34 +139,30 @@ class ReportCubit extends Cubit<ReportState> {
       ),
     );
     try {
-      await _reportRepository.deletePendingReport(report.reportId);
+      await action();
       emit(state.copyWith(clearActionReportId: true));
       return true;
     } on Object {
       emit(
-        state.copyWith(
-          clearActionReportId: true,
-          actionErrorMessage:
-              'Could not withdraw the report. Please try again.',
-        ),
+        state.copyWith(clearActionReportId: true, actionErrorMessage: failure),
       );
       return false;
     }
   }
 
-  bool _canEdit(ReportEntity report) =>
-      report.isPending &&
-      state.reports.any(
-        (ownedReport) =>
-            ownedReport.reportId == report.reportId && ownedReport.isPending,
-      );
+  /// Only the user's own pending reports can change, and one at a time.
+  bool _canChange(ReportEntity report) =>
+      state.actionReportId == null &&
+      state.reports.any((r) => r.reportId == report.reportId && r.isPending);
+
+  Future<void> _cancelSubscriptions() async {
+    await _pharmacySubscription?.cancel();
+    await _reportsSubscription?.cancel();
+  }
 
   @override
   Future<void> close() async {
-    await Future.wait([
-      _pharmacySubscription?.cancel() ?? Future<void>.value(),
-      _reportsSubscription?.cancel() ?? Future<void>.value(),
-    ]);
+    await _cancelSubscriptions();
     return super.close();
   }
 }

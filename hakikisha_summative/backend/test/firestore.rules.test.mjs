@@ -173,6 +173,43 @@ describe('scans', () => {
 });
 
 describe('reports', () => {
+  // The exact shape the app's report form writes.
+  const medicineReport = (overrides = {}) =>
+    newReport(ALICE, {
+      medicineName: 'Coartem 80/480',
+      batchNumber: 'CT24-0412',
+      purchaseLocation: 'Corner shop, KG 11 Ave, Remera',
+      pharmacyId: null,
+      ...overrides,
+    });
+
+  test('a report can name the medicine, batch and shop, with no pharmacy picked', async () => {
+    const reports = collection(dbAs(ALICE), 'reports');
+    await assertSucceeds(addDoc(reports, medicineReport()));
+    await assertSucceeds(
+      addDoc(reports, medicineReport({ batchNumber: null, purchaseLocation: null })),
+    );
+  });
+
+  test('medicine fields must be sensible text', async () => {
+    const reports = collection(dbAs(ALICE), 'reports');
+    await assertFails(addDoc(reports, medicineReport({ medicineName: '   ' })));
+    await assertFails(addDoc(reports, medicineReport({ medicineName: 'x'.repeat(121) })));
+    await assertFails(addDoc(reports, medicineReport({ batchNumber: 'x'.repeat(65) })));
+    await assertFails(addDoc(reports, medicineReport({ purchaseLocation: 42 })));
+  });
+
+  test('the owner can edit the medicine fields while pending', async () => {
+    await seed('reports/r2', { ...medicineReport(), createdAt: new Date(), updatedAt: new Date() });
+    await assertSucceeds(
+      updateDoc(doc(dbAs(ALICE), 'reports', 'r2'), {
+        medicineName: 'Coartem 20/120',
+        batchNumber: null,
+        updatedAt: serverTimestamp(),
+      }),
+    );
+  });
+
   test('a user can file a pending report with up to 3 photos', async () => {
     const reports = collection(dbAs(ALICE), 'reports');
     await assertSucceeds(addDoc(reports, newReport(ALICE)));

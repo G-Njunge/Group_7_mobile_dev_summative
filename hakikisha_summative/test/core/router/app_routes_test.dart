@@ -42,4 +42,26 @@ void main() {
       });
     }
   });
+
+  group('AppRoutes.reportFor', () {
+    test('carries the scanned medicine and batch as query parameters', () {
+      final uri = Uri.parse(
+        AppRoutes.reportFor(
+          medicineName: 'Panadol 500mg',
+          batchNumber: 'PA23-0871',
+        ),
+      );
+      expect(uri.path, AppRoutes.report);
+      expect(
+        uri.queryParameters[AppRoutes.reportMedicineParam],
+        'Panadol 500mg',
+      );
+      expect(uri.queryParameters[AppRoutes.reportBatchParam], 'PA23-0871');
+    });
+
+    test('leaves out blank values', () {
+      expect(AppRoutes.reportFor(), AppRoutes.report);
+      expect(AppRoutes.reportFor(medicineName: '  '), AppRoutes.report);
+    });
+  });
 }

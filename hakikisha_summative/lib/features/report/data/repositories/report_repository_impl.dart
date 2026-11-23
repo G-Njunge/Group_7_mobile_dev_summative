@@ -2,8 +2,6 @@ import '../../domain/entities/report_entity.dart';
 import '../../domain/repositories/report_repository.dart';
 import '../datasources/report_remote_data_source.dart';
 
-import 'dart:typed_data';
-
 class ReportRepositoryImpl implements ReportRepository {
   ReportRepositoryImpl(this._remoteDataSource);
 
@@ -14,27 +12,18 @@ class ReportRepositoryImpl implements ReportRepository {
       _remoteDataSource.watchMyReports(userId);
 
   @override
-  Future<void> createCounterfeitReport({
+  Future<void> createReport({
     required String userId,
-    required String pharmacyId,
-    required String description,
-    List<Uint8List> photoBytes = const [],
-  }) => _remoteDataSource.createCounterfeitReport(
-    userId: userId,
-    pharmacyId: pharmacyId,
-    description: description,
-    photoBytes: photoBytes,
-  );
+    required ReportDraft draft,
+  }) => _remoteDataSource.createReport(userId: userId, draft: draft.normalized);
 
   @override
   Future<void> updatePendingReport({
     required String reportId,
-    required String pharmacyId,
-    required String description,
+    required ReportDraft draft,
   }) => _remoteDataSource.updatePendingReport(
     reportId: reportId,
-    pharmacyId: pharmacyId,
-    description: description,
+    draft: draft.normalized,
   );
 
   @override

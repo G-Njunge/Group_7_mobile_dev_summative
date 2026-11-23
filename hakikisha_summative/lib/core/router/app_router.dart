@@ -16,6 +16,7 @@ import '../../features/pharmacy/presentation/bloc/pharmacy_map_cubit.dart';
 import '../../features/pharmacy/presentation/pages/pharmacy_map_page.dart';
 import '../../features/profile/presentation/bloc/profile_cubit.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
+import '../../features/report/domain/entities/report_entity.dart';
 import '../../features/report/presentation/pages/counterfeit_report_page.dart';
 import '../../features/report/presentation/pages/my_reports_page.dart';
 import '../../features/scan/domain/repositories/scan_repository.dart';
@@ -85,8 +86,13 @@ GoRouter createAppRouter(SessionCubit session) => GoRouter(
               userId: user.uid,
               scanRepository: sl<ScanRepository>(),
               onOpenPharmacyMap: () => context.go(AppRoutes.pharmacies),
-              onOpenReport: ({medicineName, batchNumber}) =>
-                  context.go(AppRoutes.report),
+              // Carry what the scan found into the report form.
+              onOpenReport: ({medicineName, batchNumber}) => context.go(
+                AppRoutes.reportFor(
+                  medicineName: medicineName,
+                  batchNumber: batchNumber,
+                ),
+              ),
               onOpenHistory: () => context.go(AppRoutes.history),
             ),
           ),
@@ -129,8 +135,19 @@ GoRouter createAppRouter(SessionCubit session) => GoRouter(
     ),
     GoRoute(
       path: AppRoutes.report,
-      builder: (context, _) =>
-          _forUser(context, (uid) => CounterfeitReportPage(userId: uid)),
+      builder: (context, state) {
+        final query = state.uri.queryParameters;
+        return _forUser(
+          context,
+          (uid) => CounterfeitReportPage(
+            userId: uid,
+            prefill: ReportDraft(
+              medicineName: query[AppRoutes.reportMedicineParam] ?? '',
+              batchNumber: query[AppRoutes.reportBatchParam],
+            ),
+          ),
+        );
+      },
     ),
     GoRoute(
       path: AppRoutes.myReports,
