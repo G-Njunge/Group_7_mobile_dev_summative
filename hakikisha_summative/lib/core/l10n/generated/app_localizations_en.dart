@@ -138,4 +138,75 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileSaveChanges => 'Save changes';
+
+  @override
+  String get historyScans => 'Scans';
+
+  @override
+  String get historyGenuine => 'Genuine';
+
+  @override
+  String get historyFlagged => 'Flagged';
+
+  @override
+  String get historyNotFound => 'Not found';
+
+  @override
+  String get historyRecentScans => 'RECENT SCANS';
+
+  @override
+  String get historyEmpty => 'No scans to show yet.';
+
+  @override
+  String get historyLoadError =>
+      'We couldn\'t load your scan history. Please try again.';
+
+  @override
+  String get historyUnknownMedicine => 'Unknown medicine';
+
+  @override
+  String get historyResult => 'Result';
+
+  @override
+  String get historyMethod => 'Method';
+
+  @override
+  String get historyScanned => 'Scanned';
+
+  @override
+  String get historyBatch => 'Batch';
+
+  @override
+  String get historyScanId => 'Scan ID';
+
+  @override
+  String get historyMethodCamera => 'Camera';
+
+  @override
+  String get historyMethodManual => 'Entered by hand';
+
+  @override
+  String get historyMethodUpload => 'Photo upload';
+
+  @override
+  String get historyDeleteTitle => 'Delete this scan?';
+
+  @override
+  String get historyDeleteMessage => 'It will be removed from your history.';
+
+  @override
+  String get historyDeleteConfirm => 'Delete';
+
+  @override
+  String get historyDeleteCancel => 'Cancel';
+
+  @override
+  String get historyDeleted => 'Scan deleted.';
+
+  @override
+  String get historyDeleteError =>
+      'We couldn\'t delete that scan. Please try again.';
+
+  @override
+  String get historyDeleteTooltip => 'Delete scan';
 }

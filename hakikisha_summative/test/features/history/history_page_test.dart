@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:hakikisha_summative/core/l10n/generated/app_localizations.dart';
 import 'package:hakikisha_summative/features/history/domain/entities/scan_entity.dart';
 import 'package:hakikisha_summative/features/history/domain/entities/scan_summary.dart';
 import 'package:hakikisha_summative/features/history/domain/repositories/history_repository.dart';
@@ -36,12 +38,25 @@ Future<_FakeRepo> _pumpPage(WidgetTester tester) async {
   final repo = _FakeRepo();
   addTearDown(repo.controller.close);
 
-  await tester.pumpWidget(
-    MaterialApp(
-      home: BlocProvider(
-        create: (_) => HistoryCubit(repo)..start('u1'),
-        child: const HistoryPage(),
+  final router = GoRouter(
+    initialLocation: '/',
+    routes: [
+      GoRoute(
+        path: '/',
+        builder: (context, state) => BlocProvider(
+          create: (_) => HistoryCubit(repo)..start('u1'),
+          child: const HistoryPage(),
+        ),
       ),
+    ],
+  );
+  addTearDown(router.dispose);
+
+  await tester.pumpWidget(
+    MaterialApp.router(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      routerConfig: router,
     ),
   );
   return repo;
