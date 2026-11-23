@@ -267,7 +267,8 @@ void main() {
         SettingsRepositoryImpl.languageKey: AppLanguage.kinyarwanda.name,
       },
     );
-    expect(find.text('Iyi paji iracyubakwa.'), findsOneWidget);
+    // Home loads (its own text isn't translated yet).
+    expect(find.text('What are you checking today?'), findsOneWidget);
 
     await tester.tap(find.byTooltip('Fungura menu'));
     await tester.pumpAndSettle();
