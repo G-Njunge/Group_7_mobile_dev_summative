@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 
+import '../../../../core/widgets/app_drawer.dart';
 import '../../../pharmacy/domain/entities/pharmacy_entity.dart';
 import '../bloc/report_cubit.dart';
 import '../bloc/report_state.dart';
@@ -45,6 +46,7 @@ class _CounterfeitReportViewState extends State<_CounterfeitReportView> {
     builder: (context, state) {
       final cubit = context.read<ReportCubit>();
       return Scaffold(
+        drawer: const AppDrawer(),
         appBar: AppBar(
           title: const Text('Report suspected counterfeit'),
           actions: [

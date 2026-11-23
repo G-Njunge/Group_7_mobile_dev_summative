@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../features/auth/auth_injection.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
+import '../../features/history/history_injection.dart';
 import '../../features/pharmacy/pharmacy_injection.dart';
 import '../../features/report/report_injection.dart';
 import '../../features/settings/settings_injection.dart';
@@ -43,6 +44,7 @@ Future<void> configureDependencies() async {
     ..registerFactory(() => SessionCubit(sl()));
 
   registerAuthDependencies(sl);
+  registerHistoryDependencies(sl);
   registerPharmacyDependencies(sl);
   registerReportDependencies(sl);
   registerSettingsDependencies(sl);
