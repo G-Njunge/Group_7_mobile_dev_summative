@@ -1,5 +1,7 @@
 import '../entities/report_entity.dart';
 
+import 'dart:typed_data';
+
 abstract interface class ReportRepository {
   Stream<List<ReportEntity>> watchMyReports(String userId);
 
@@ -7,6 +9,7 @@ abstract interface class ReportRepository {
     required String userId,
     required String pharmacyId,
     required String description,
+    List<Uint8List> photoBytes = const [],
   });
 
   Future<void> updatePendingReport({

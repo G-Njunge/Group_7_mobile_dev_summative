@@ -2,6 +2,8 @@ import '../../domain/entities/report_entity.dart';
 import '../../domain/repositories/report_repository.dart';
 import '../datasources/report_remote_data_source.dart';
 
+import 'dart:typed_data';
+
 class ReportRepositoryImpl implements ReportRepository {
   ReportRepositoryImpl(this._remoteDataSource);
 
@@ -16,10 +18,12 @@ class ReportRepositoryImpl implements ReportRepository {
     required String userId,
     required String pharmacyId,
     required String description,
+    List<Uint8List> photoBytes = const [],
   }) => _remoteDataSource.createCounterfeitReport(
     userId: userId,
     pharmacyId: pharmacyId,
     description: description,
+    photoBytes: photoBytes,
   );
 
   @override

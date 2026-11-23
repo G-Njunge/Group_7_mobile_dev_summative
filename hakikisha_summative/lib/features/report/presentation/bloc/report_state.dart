@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import 'dart:typed_data';
+
 import '../../../pharmacy/domain/entities/pharmacy_entity.dart';
 import '../../domain/entities/report_entity.dart';
 
@@ -20,6 +22,7 @@ class ReportState extends Equatable {
     this.actionReportId,
     this.actionErrorMessage,
     this.errorMessage,
+    this.photoBytes = const [],
   });
 
   final ReportPharmacyStatus pharmacyStatus;
@@ -33,6 +36,7 @@ class ReportState extends Equatable {
   final String? actionReportId;
   final String? actionErrorMessage;
   final String? errorMessage;
+  final List<Uint8List> photoBytes;
 
   ReportState copyWith({
     ReportPharmacyStatus? pharmacyStatus,
@@ -50,6 +54,7 @@ class ReportState extends Equatable {
     bool clearActionErrorMessage = false,
     String? errorMessage,
     bool clearErrorMessage = false,
+    List<Uint8List>? photoBytes,
   }) => ReportState(
     pharmacyStatus: pharmacyStatus ?? this.pharmacyStatus,
     pharmacies: pharmacies ?? this.pharmacies,
@@ -68,6 +73,7 @@ class ReportState extends Equatable {
         ? null
         : actionErrorMessage ?? this.actionErrorMessage,
     errorMessage: clearErrorMessage ? null : errorMessage ?? this.errorMessage,
+    photoBytes: photoBytes ?? this.photoBytes,
   );
 
   @override
@@ -83,5 +89,6 @@ class ReportState extends Equatable {
     actionReportId,
     actionErrorMessage,
     errorMessage,
+    photoBytes,
   ];
 }

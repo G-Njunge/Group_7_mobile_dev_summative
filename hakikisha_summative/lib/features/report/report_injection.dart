@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get_it/get_it.dart';
 
 import '../pharmacy/domain/repositories/pharmacy_repository.dart';
@@ -10,7 +11,10 @@ import 'presentation/bloc/report_cubit.dart';
 void registerReportDependencies(GetIt sl) {
   sl
     ..registerLazySingleton<ReportRemoteDataSource>(
-      () => ReportRemoteDataSource(FirebaseFirestore.instance),
+      () => ReportRemoteDataSource(
+        FirebaseFirestore.instance,
+        FirebaseStorage.instance,
+      ),
     )
     ..registerLazySingleton<ReportRepository>(
       () => ReportRepositoryImpl(sl<ReportRemoteDataSource>()),

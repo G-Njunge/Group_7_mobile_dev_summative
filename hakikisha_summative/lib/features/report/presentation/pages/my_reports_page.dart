@@ -182,6 +182,31 @@ class _ReportList extends StatelessWidget {
                 ),
               const SizedBox(height: 8),
               Text(report.description),
+              if (report.photoUrls.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                SizedBox(
+                  height: 120,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: report.photoUrls.length,
+                    separatorBuilder: (_, _) => const SizedBox(width: 8),
+                    itemBuilder: (_, index) => ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        report.photoUrls[index],
+                        width: 160,
+                        height: 120,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => const SizedBox(
+                          width: 160,
+                          height: 120,
+                          child: Icon(Icons.broken_image_outlined),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
               if (report.isPending) ...[
                 const SizedBox(height: 8),
                 Row(

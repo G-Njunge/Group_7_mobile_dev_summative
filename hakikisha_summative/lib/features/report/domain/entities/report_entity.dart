@@ -7,6 +7,7 @@ class ReportEntity extends Equatable {
     required this.description,
     required this.status,
     this.createdAt,
+    this.photoUrls = const [],
   });
 
   final String reportId;
@@ -14,6 +15,7 @@ class ReportEntity extends Equatable {
   final String description;
   final String status;
   final DateTime? createdAt;
+  final List<String> photoUrls;
 
   bool get isPending => status == 'pending';
 
@@ -24,5 +26,6 @@ class ReportEntity extends Equatable {
     description,
     status,
     createdAt,
+    photoUrls,
   ];
 }

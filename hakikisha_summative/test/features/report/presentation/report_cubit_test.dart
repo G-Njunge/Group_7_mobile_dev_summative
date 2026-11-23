@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hakikisha_summative/features/pharmacy/domain/entities/pharmacy_entity.dart';
@@ -36,6 +37,7 @@ class FakeReportRepository implements ReportRepository {
     required String userId,
     required String pharmacyId,
     required String description,
+    List<Uint8List> photoBytes = const [],
   }) async {
     if (failure != null) throw failure!;
     this.userId = userId;
