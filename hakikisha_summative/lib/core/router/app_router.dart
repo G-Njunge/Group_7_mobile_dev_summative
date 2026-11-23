@@ -12,6 +12,8 @@ import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/auth/presentation/pages/verify_email_page.dart';
 import '../../features/pharmacy/presentation/bloc/pharmacy_map_cubit.dart';
 import '../../features/pharmacy/presentation/pages/pharmacy_map_page.dart';
+import '../../features/report/presentation/pages/counterfeit_report_page.dart';
+import '../../features/report/presentation/pages/my_reports_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
 import '../di/injection.dart';
 import '../session/session_cubit.dart';
@@ -65,8 +67,18 @@ GoRouter createAppRouter(SessionCubit session) => GoRouter(
         ),
       ),
     ),
-    _placeholder(AppRoutes.report, 'Report a medicine'),
-    _placeholder(AppRoutes.myReports, 'My reports'),
+    GoRoute(
+      path: AppRoutes.report,
+      builder: (context, _) => CounterfeitReportPage(
+        userId: context.select((AuthBloc bloc) => bloc.state.user?.uid) ?? '',
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.myReports,
+      builder: (context, _) => MyReportsPage(
+        userId: context.select((AuthBloc bloc) => bloc.state.user?.uid) ?? '',
+      ),
+    ),
     // M5: settings
     GoRoute(path: AppRoutes.settings, builder: (_, _) => const SettingsPage()),
   ],

@@ -4,11 +4,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/router/app_routes.dart';
 import '../../../pharmacy/domain/entities/pharmacy_entity.dart';
 import '../bloc/report_cubit.dart';
 import '../bloc/report_state.dart';
-import 'my_reports_page.dart';
 
 class CounterfeitReportPage extends StatelessWidget {
   const CounterfeitReportPage({required this.userId, super.key});
@@ -50,17 +51,13 @@ class _CounterfeitReportViewState extends State<_CounterfeitReportView> {
           actions: [
             IconButton(
               tooltip: 'My reports',
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => MyReportsPage(userId: widget.userId),
-                ),
-              ),
+              onPressed: () => context.push(AppRoutes.myReports),
               icon: const Icon(Icons.receipt_long_outlined),
             ),
           ],
         ),
         body: state.isSubmitted
-            ? _ReportSentView(userId: widget.userId)
+            ? const _ReportSentView()
             : SafeArea(
                 child: Form(
                   key: _formKey,
@@ -151,9 +148,7 @@ class _CounterfeitReportViewState extends State<_CounterfeitReportView> {
 }
 
 class _ReportSentView extends StatelessWidget {
-  const _ReportSentView({required this.userId});
-
-  final String userId;
+  const _ReportSentView();
 
   @override
   Widget build(BuildContext context) => SafeArea(
@@ -184,11 +179,7 @@ class _ReportSentView extends StatelessWidget {
               child: const Text('Done'),
             ),
             TextButton(
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => MyReportsPage(userId: userId),
-                ),
-              ),
+              onPressed: () => context.push(AppRoutes.myReports),
               child: const Text('View my reports'),
             ),
           ],
