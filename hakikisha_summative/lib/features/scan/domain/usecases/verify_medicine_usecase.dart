@@ -3,17 +3,21 @@ import '../entities/medicine_entity.dart';
 import '../entities/verification_outcome.dart';
 
 class VerifyMedicineUseCase {
-  VerificationResult evaluate({
+  VerificationResult execute({
+    required String queriedCode,
     required BatchEntity? batch,
     required MedicineEntity? medicine,
-    DateTime? currentDate,
+    DateTime? clock,
   }) {
     if (batch == null || medicine == null) {
-      return const VerificationResult(status: VerificationStatus.notFound);
+      return VerificationResult(
+        status: VerificationStatus.notFound,
+        queriedCode: queriedCode,
+      );
     }
 
-    final now = currentDate ?? DateTime.now();
-    final normalizedStatus = batch.status.toLowerCase().trim();
+    final now = clock ?? DateTime.now();
+    final normalizedStatus = batch.status.trim().toLowerCase();
 
     if (normalizedStatus == 'recalled') {
       return VerificationResult(
@@ -21,6 +25,7 @@ class VerifyMedicineUseCase {
         flagReason: FlagReason.recalled,
         medicine: medicine,
         batch: batch,
+        queriedCode: queriedCode,
       );
     }
 
@@ -30,15 +35,27 @@ class VerifyMedicineUseCase {
         flagReason: FlagReason.counterfeit,
         medicine: medicine,
         batch: batch,
+        queriedCode: queriedCode,
       );
     }
 
-    if (batch.expiryDate.isBefore(now)) {
+    // Compare date-only or exact timestamp so packs expiring today remain valid until day end
+    final expiryEndOfDay = DateTime(
+      batch.expiryDate.year,
+      batch.expiryDate.month,
+      batch.expiryDate.day,
+      23,
+      59,
+      59,
+    );
+
+    if (expiryEndOfDay.isBefore(now)) {
       return VerificationResult(
         status: VerificationStatus.flagged,
         flagReason: FlagReason.expired,
         medicine: medicine,
         batch: batch,
+        queriedCode: queriedCode,
       );
     }
 
@@ -46,6 +63,7 @@ class VerifyMedicineUseCase {
       status: VerificationStatus.genuine,
       medicine: medicine,
       batch: batch,
+      queriedCode: queriedCode,
     );
   }
 }
