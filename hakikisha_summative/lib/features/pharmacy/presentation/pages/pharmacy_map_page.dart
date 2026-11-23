@@ -78,12 +78,12 @@ class _PharmacyMapViewState extends State<_PharmacyMapView> {
       _lastCurrentLocation = state.currentLocation;
     },
     builder: (context, state) => Scaffold(
-      drawer: const AppDrawer(),
       appBar: AppBar(
         title: const Text('Pharmacy map'),
         backgroundColor: AuthColors.surface,
         surfaceTintColor: Colors.transparent,
       ),
+      drawer: const AppDrawer(),
       body: ColoredBox(
         color: AuthColors.surface,
         child: SafeArea(

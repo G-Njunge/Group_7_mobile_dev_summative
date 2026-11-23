@@ -186,6 +186,7 @@ describe('reports', () => {
     await assertFails(addDoc(reports, newReport(BOB)));
     await assertFails(addDoc(reports, newReport(ALICE, { status: 'reviewed' })));
     await assertFails(addDoc(reports, newReport(ALICE, { description: '' })));
+    await assertFails(addDoc(reports, newReport(ALICE, { description: '   ' })));
     await assertFails(addDoc(reports, newReport(ALICE, { photoUrls: ['1', '2', '3', '4'] })));
   });
 
