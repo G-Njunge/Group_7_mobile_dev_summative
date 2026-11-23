@@ -15,7 +15,7 @@ class MedicineModel extends MedicineEntity {
       medicineId: id,
       name: json['name'] as String? ?? 'Unknown Medicine',
       manufacturer: json['manufacturer'] as String? ?? 'Unknown Manufacturer',
-      rfdaRegNo: json['ppbRegNo'] as String? ?? 'N/A', // Exact ERD key
+      rfdaRegNo: json['registrationNo'] as String? ?? 'N/A', // ERD key
       dosageForm: json['dosageForm'] as String? ?? '',
       strength: json['strength'] as String? ?? '',
     );
@@ -26,7 +26,7 @@ class MedicineModel extends MedicineEntity {
       'medicineId': medicineId,
       'name': name,
       'manufacturer': manufacturer,
-      'ppbRegNo': rfdaRegNo,
+      'registrationNo': rfdaRegNo,
       'dosageForm': dosageForm,
       'strength': strength,
     };
