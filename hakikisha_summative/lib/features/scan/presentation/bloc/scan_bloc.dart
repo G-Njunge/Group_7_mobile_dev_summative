@@ -12,12 +12,16 @@ class ScanBloc extends Bloc<ScanEvent, ScanState> {
   final ScanRepository repository;
   final VerifyMedicineUseCase verifyMedicineUseCase;
   final String Function() getCurrentUserId;
+  final bool Function() shouldSaveHistory;
   final Duration animationDuration;
+
+  static bool _defaultSaveHistory() => true;
 
   ScanBloc({
     required this.repository,
     required this.verifyMedicineUseCase,
     required this.getCurrentUserId,
+    this.shouldSaveHistory = _defaultSaveHistory,
     this.animationDuration = const Duration(
       seconds: 2,
     ), // Required 2s animation[cite: 21]
@@ -49,7 +53,7 @@ class ScanBloc extends Bloc<ScanEvent, ScanState> {
       final userId = getCurrentUserId();
       var saved = false;
 
-      if (userId.isNotEmpty) {
+      if (userId.isNotEmpty && shouldSaveHistory()) {
         final record = ScanRecordEntity(
           scanId: '',
           userId: userId,

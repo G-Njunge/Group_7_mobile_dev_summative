@@ -29,7 +29,7 @@ class ScanRecordModel extends ScanRecordEntity {
       scanId: id,
       userId: json['userId'] as String? ?? '',
       batchId: json['batchId'] as String? ?? '',
-      result: json['result'] as String? ?? 'not_found',
+      result: json['result'] as String? ?? 'notFound',
       method: _parseMethod(json['method'] as String?),
       scannedAt: parsedDate,
       medicineName: medicineName,
@@ -45,7 +45,7 @@ class ScanRecordModel extends ScanRecordEntity {
       'batchId': batchId,
       'result': result,
       'method': method.name, // 'camera', 'manual', or 'upload'[cite: 21]
-      'scannedAt': Timestamp.fromDate(scannedAt),
+      'scannedAt': FieldValue.serverTimestamp(),
     };
   }
 

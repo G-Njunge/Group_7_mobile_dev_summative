@@ -6,7 +6,7 @@ class ScanRecordEntity extends Equatable {
   final String scanId;
   final String userId;
   final String batchId;
-  final String result; // 'genuine', 'flagged', 'not_found'
+  final String result; // 'genuine', 'flagged', 'notFound'
   final ScanMethod method;
   final DateTime scannedAt;
 

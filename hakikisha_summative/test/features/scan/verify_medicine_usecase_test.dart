@@ -90,5 +90,6 @@ void main() {
     );
 
     expect(result.status, VerificationStatus.notFound);
+    expect(result.firestoreResultValue, 'notFound');
   });
 }

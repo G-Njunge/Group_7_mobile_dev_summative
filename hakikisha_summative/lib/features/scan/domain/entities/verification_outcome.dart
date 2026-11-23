@@ -29,7 +29,7 @@ class VerificationResult extends Equatable {
       case VerificationStatus.flagged:
         return 'flagged';
       case VerificationStatus.notFound:
-        return 'not_found';
+        return 'notFound';
     }
   }
 

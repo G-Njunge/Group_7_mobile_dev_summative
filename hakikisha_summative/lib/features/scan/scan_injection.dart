@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 
+import '../settings/domain/repositories/settings_repository.dart';
 import 'data/datasources/scan_remote_datasource.dart';
 import 'data/repositories/scan_repository_impl.dart';
 import 'domain/repositories/scan_repository.dart';
@@ -25,6 +26,7 @@ void registerScanDependencies(GetIt sl) {
         repository: sl<ScanRepository>(),
         verifyMedicineUseCase: sl<VerifyMedicineUseCase>(),
         getCurrentUserId: () => sl<FirebaseAuth>().currentUser?.uid ?? '',
+        shouldSaveHistory: () => sl<SettingsRepository>().load().saveHistory,
       ),
     );
 }
