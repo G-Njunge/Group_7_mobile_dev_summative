@@ -56,3 +56,6 @@ service-account*.json
 
 # Flutter test coverage output
 coverage/
+
+# Gradle output written next to the Android project by newer Android Gradle Plugin versions
+android/build/
