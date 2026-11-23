@@ -1,25 +1,30 @@
-// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/generated/app_localizations.dart';
+import '../../../../core/theme/app_palette.dart';
+import '../../../../core/widgets/neumorphic.dart';
 import '../bloc/history_state.dart';
-import 'scan_tile.dart';
 
-/// The 14 / 12 / 2 cards at the top. Tapping one filters the list.
+/// The Scans / Genuine / Flagged cards at the top. Tapping one filters the
+/// list below.
 class HistoryStats extends StatelessWidget {
+  const HistoryStats({super.key, required this.state, required this.onSelect});
+
   final HistoryState state;
   final ValueChanged<HistoryFilter> onSelect;
 
-  const HistoryStats({super.key, required this.state, required this.onSelect});
-
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final palette = context.palette;
+
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
       child: Row(
         children: [
           Expanded(
             child: _StatCard(
-              label: 'Scans',
+              label: l10n.historyScans,
               count: state.totalCount,
               selected: state.filter == HistoryFilter.all,
               onTap: () => onSelect(HistoryFilter.all),
@@ -28,9 +33,9 @@ class HistoryStats extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: _StatCard(
-              label: 'Genuine',
+              label: l10n.historyGenuine,
               count: state.genuineCount,
-              color: resultColor('genuine'),
+              color: palette.success,
               selected: state.filter == HistoryFilter.genuine,
               onTap: () => onSelect(HistoryFilter.genuine),
             ),
@@ -38,9 +43,9 @@ class HistoryStats extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: _StatCard(
-              label: 'Flagged',
+              label: l10n.historyFlagged,
               count: state.flaggedCount,
-              color: resultColor('flagged'),
+              color: palette.danger,
               selected: state.filter == HistoryFilter.flagged,
               onTap: () => onSelect(HistoryFilter.flagged),
             ),
@@ -52,12 +57,6 @@ class HistoryStats extends StatelessWidget {
 }
 
 class _StatCard extends StatelessWidget {
-  final String label;
-  final int count;
-  final Color? color;
-  final bool selected;
-  final VoidCallback onTap;
-
   const _StatCard({
     required this.label,
     required this.count,
@@ -66,35 +65,45 @@ class _StatCard extends StatelessWidget {
     this.color,
   });
 
+  final String label;
+  final int count;
+  final Color? color;
+  final bool selected;
+  final VoidCallback onTap;
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final palette = context.palette;
 
-    return Card(
-      margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: selected ? theme.colorScheme.primary : Colors.transparent,
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: selected ? palette.brand : Colors.transparent,
           width: 2,
         ),
       ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+      child: NeuCard(
         onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+        child: SizedBox(
+          width: double.infinity,
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 '$count',
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.bold,
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: color ?? palette.heading,
                 ),
               ),
-              Text(label, style: theme.textTheme.bodySmall),
+              const SizedBox(height: 2),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 12, color: palette.textMuted),
+              ),
             ],
           ),
         ),

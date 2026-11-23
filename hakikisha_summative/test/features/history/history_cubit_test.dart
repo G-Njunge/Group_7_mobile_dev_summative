@@ -7,16 +7,19 @@ import 'package:hakikisha_summative/features/history/domain/repositories/history
 import 'package:hakikisha_summative/features/history/presentation/bloc/history_cubit.dart';
 import 'package:hakikisha_summative/features/history/presentation/bloc/history_state.dart';
 
-/// A stand-in repository. The test decides what it "sends", so no
-/// Firebase is needed.
 class FakeHistoryRepository implements HistoryRepository {
   final controller = StreamController<List<ScanSummary>>();
+  bool shouldFail = false;
+  String? deletedScanId;
 
   @override
   Stream<List<ScanSummary>> watchScans(String userId) => controller.stream;
 
   @override
-  Future<void> deleteScan(String scanId) async {}
+  Future<void> deleteScan(String scanId) async {
+    if (shouldFail) throw Exception('boom');
+    deletedScanId = scanId;
+  }
 }
 
 void main() {
@@ -89,5 +92,20 @@ void main() {
 
     expect(cubit.state.status, HistoryStatus.error);
     expect(cubit.state.errorMessage, isNotNull);
+  });
+
+  test('deleteScan asks the repository to delete and returns true', () async {
+    final ok = await cubit.deleteScan('s1');
+
+    expect(ok, isTrue);
+    expect(repo.deletedScanId, 's1');
+  });
+
+  test('deleteScan returns false when the repository fails', () async {
+    repo.shouldFail = true;
+
+    final ok = await cubit.deleteScan('s1');
+
+    expect(ok, isFalse);
   });
 }

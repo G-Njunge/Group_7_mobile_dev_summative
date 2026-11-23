@@ -107,7 +107,7 @@ Use these instead of restyling. They follow the Figma file and support light and
 | Sign-out, session state | `context.read<SessionCubit>()` |
 | User settings (scan sound, vibration, save history) | `context.read<SettingsCubit>().state.settings` |
 
-**Translations:** add each new string to both `lib/core/l10n/app_en.arb` and `app_sw.arb`, then use `AppLocalizations.of(context).yourKey`. The Dart code is generated on `flutter pub get` / `flutter run` (or run `flutter gen-l10n`).
+**Translations:** the app supports English, Kiswahili and Kinyarwanda. Add each new string to all three files in `lib/core/l10n/` (`app_en.arb`, `app_sw.arb`, `app_rw.arb`), then use `AppLocalizations.of(context).yourKey`. The Dart code is generated on `flutter pub get` / `flutter run` (or run `flutter gen-l10n`). Flutter has no built-in Kinyarwanda strings, so its own widgets (dialog buttons, tooltips) fall back to English; see `lib/core/l10n/app_localizations_delegates.dart`.
 
 **Plugging in your feature:** in `lib/core/router/app_router.dart`, replace your `_placeholder(...)` with a `GoRoute` to your page. In `lib/core/di/injection.dart`, call your `register<Feature>Dependencies(sl)`.
 

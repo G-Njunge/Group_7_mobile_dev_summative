@@ -351,6 +351,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save changes'**
   String get profileSaveChanges;
+
+  /// No description provided for @historyScans.
+  ///
+  /// In en, this message translates to:
+  /// **'Scans'**
+  String get historyScans;
+
+  /// No description provided for @historyGenuine.
+  ///
+  /// In en, this message translates to:
+  /// **'Genuine'**
+  String get historyGenuine;
+
+  /// No description provided for @historyFlagged.
+  ///
+  /// In en, this message translates to:
+  /// **'Flagged'**
+  String get historyFlagged;
+
+  /// No description provided for @historyNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Not found'**
+  String get historyNotFound;
+
+  /// No description provided for @historyRecentScans.
+  ///
+  /// In en, this message translates to:
+  /// **'RECENT SCANS'**
+  String get historyRecentScans;
+
+  /// No description provided for @historyEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No scans to show yet.'**
+  String get historyEmpty;
+
+  /// No description provided for @historyLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load your scan history. Please try again.'**
+  String get historyLoadError;
+
+  /// No description provided for @historyUnknownMedicine.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown medicine'**
+  String get historyUnknownMedicine;
+
+  /// No description provided for @historyResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Result'**
+  String get historyResult;
+
+  /// No description provided for @historyMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Method'**
+  String get historyMethod;
+
+  /// No description provided for @historyScanned.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanned'**
+  String get historyScanned;
+
+  /// No description provided for @historyBatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch'**
+  String get historyBatch;
+
+  /// No description provided for @historyScanId.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan ID'**
+  String get historyScanId;
+
+  /// No description provided for @historyMethodCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get historyMethodCamera;
+
+  /// No description provided for @historyMethodManual.
+  ///
+  /// In en, this message translates to:
+  /// **'Entered by hand'**
+  String get historyMethodManual;
+
+  /// No description provided for @historyMethodUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo upload'**
+  String get historyMethodUpload;
+
+  /// No description provided for @historyDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this scan?'**
+  String get historyDeleteTitle;
+
+  /// No description provided for @historyDeleteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'It will be removed from your history.'**
+  String get historyDeleteMessage;
+
+  /// No description provided for @historyDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get historyDeleteConfirm;
+
+  /// No description provided for @historyDeleteCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get historyDeleteCancel;
+
+  /// No description provided for @historyDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan deleted.'**
+  String get historyDeleted;
+
+  /// No description provided for @historyDeleteError.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t delete that scan. Please try again.'**
+  String get historyDeleteError;
+
+  /// No description provided for @historyDeleteTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete scan'**
+  String get historyDeleteTooltip;
 }
 
 class _AppLocalizationsDelegate

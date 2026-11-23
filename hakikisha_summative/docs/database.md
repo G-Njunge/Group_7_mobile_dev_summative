@@ -29,7 +29,7 @@ erDiagram
         string medicineId PK
         string name
         string manufacturer
-        string ppbRegNo
+        string registrationNo
         string dosageForm
         string strength
     }

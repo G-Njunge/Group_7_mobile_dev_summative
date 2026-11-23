@@ -1,10 +1,10 @@
 {
   "_note": "Demo data for development and the demo video. Registration numbers, GTINs (restricted-circulation prefix 2) and phone numbers are fictional.",
   "medicines": [
-    { "medicineId": "med_panadol_advance_500", "name": "Panadol Advance 500mg", "manufacturer": "GSK", "ppbRegNo": "RwandaFDA/DEMO/0001", "dosageForm": "tablet", "strength": "500mg" },
-    { "medicineId": "med_coartem_80_480", "name": "Coartem 80/480", "manufacturer": "Novartis", "ppbRegNo": "RwandaFDA/DEMO/0002", "dosageForm": "tablet", "strength": "80mg/480mg" },
-    { "medicineId": "med_amoxil_250", "name": "Amoxil 250mg", "manufacturer": "GSK", "ppbRegNo": "RwandaFDA/DEMO/0003", "dosageForm": "capsule", "strength": "250mg" },
-    { "medicineId": "med_zinnat_500", "name": "Zinnat 500mg", "manufacturer": "GSK", "ppbRegNo": "RwandaFDA/DEMO/0004", "dosageForm": "tablet", "strength": "500mg" }
+    { "medicineId": "med_panadol_advance_500", "name": "Panadol Advance 500mg", "manufacturer": "GSK", "registrationNo": "RwandaFDA/DEMO/0001", "dosageForm": "tablet", "strength": "500mg" },
+    { "medicineId": "med_coartem_80_480", "name": "Coartem 80/480", "manufacturer": "Novartis", "registrationNo": "RwandaFDA/DEMO/0002", "dosageForm": "tablet", "strength": "80mg/480mg" },
+    { "medicineId": "med_amoxil_250", "name": "Amoxil 250mg", "manufacturer": "GSK", "registrationNo": "RwandaFDA/DEMO/0003", "dosageForm": "capsule", "strength": "250mg" },
+    { "medicineId": "med_zinnat_500", "name": "Zinnat 500mg", "manufacturer": "GSK", "registrationNo": "RwandaFDA/DEMO/0004", "dosageForm": "tablet", "strength": "500mg" }
   ],
   "batches": [
     { "batchId": "bat_pa24_1150", "medicineId": "med_panadol_advance_500", "batchNumber": "PA24-1150", "gtin": "2000000000015", "expiryDate": "2027-08-31", "status": "valid" },

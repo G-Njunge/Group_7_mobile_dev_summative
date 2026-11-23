@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/l10n/generated/app_localizations.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../../../core/widgets/app_scaffold.dart';
 import '../../../../core/widgets/app_snack_bar.dart';
 import '../../../../core/widgets/neumorphic.dart';
@@ -47,14 +48,15 @@ class SettingsPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
                     _PickerLabel(l10n.settingsLanguage),
-                    SegmentedPill(
-                      selected: settings.language,
-                      onChanged: (v) => update((s) => s.copyWith(language: v)),
-                      options: [
-                        for (final language in AppLanguage.values)
-                          PillOption(language, language.nativeName),
-                      ],
-                    ),
+                    // A list rather than a pill: language names are long and
+                    // the list keeps growing, so it never truncates a name.
+                    for (final language in AppLanguage.values)
+                      _LanguageTile(
+                        name: language.nativeName,
+                        selected: language == settings.language,
+                        onTap: () =>
+                            update((s) => s.copyWith(language: language)),
+                      ),
                   ],
                 ),
               ),
@@ -107,6 +109,37 @@ class _PickerLabel extends StatelessWidget {
     padding: const EdgeInsets.only(left: 4, bottom: 10),
     child: Text(text, style: Theme.of(context).textTheme.titleSmall),
   );
+}
+
+/// One language option: its name in its own language, with a check mark on
+/// the selected one.
+class _LanguageTile extends StatelessWidget {
+  const _LanguageTile({
+    required this.name,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String name;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    return ListTile(
+      title: Text(name, style: const TextStyle(fontWeight: FontWeight.w600)),
+      trailing: selected
+          ? Icon(Icons.check_circle, color: palette.heading)
+          : Icon(Icons.circle_outlined, color: palette.textMuted),
+      selected: selected,
+      selectedColor: palette.heading,
+      textColor: palette.text,
+      shape: const StadiumBorder(),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+      onTap: onTap,
+    );
+  }
 }
 
 /// A card of switch rows separated by dividers.

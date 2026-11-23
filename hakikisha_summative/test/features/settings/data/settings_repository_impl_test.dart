@@ -21,6 +21,17 @@ void main() {
     saveHistory: false,
   );
 
+  test('every language survives a save and relaunch', () async {
+    for (final language in AppLanguage.values) {
+      final settings = AppSettings(language: language);
+      await (await repoWith({})).save(settings);
+      final relaunched = SettingsRepositoryImpl(
+        await SharedPreferences.getInstance(),
+      );
+      expect(relaunched.load(), settings, reason: language.name);
+    }
+  });
+
   test('first launch returns the defaults', () async {
     expect((await repoWith({})).load(), const AppSettings());
   });
