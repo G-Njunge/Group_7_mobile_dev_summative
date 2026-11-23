@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -15,17 +16,14 @@ Future<void> main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await configureDependencies();
 
-  // App-lifetime cubits: created once here, so the router and the whole
-  // widget tree share the same instances.
   final session = sl<SessionCubit>();
   runApp(
     // One AuthBloc for the whole app, so every auth screen sees the same
     // user. It sits above the router so pushed routes can read it too.
     BlocProvider(
       create: (_) => sl<AuthBloc>()..add(const AuthSubscriptionRequested()),
-      // Firebase doesn't always emit a user change when a reload reveals a
-      // newly verified email, but the AuthBloc does. Re-reading the session
-      // then lets the router move the user off the Verify email screen.
+      // Firebase does not emit a user change on every email reload, but the
+      // AuthBloc does. Re-reading the session moves the user away from Verify.
       child: BlocListener<AuthBloc, AuthState>(
         listenWhen: (previous, current) => previous.status != current.status,
         listener: (_, _) => session.refresh(),

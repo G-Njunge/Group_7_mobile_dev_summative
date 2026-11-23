@@ -2,21 +2,11 @@ rules_version = '2';
 
 // Hakikisha Firestore security rules.
 //
-// Principles:
-// - Deny by default: anything not matched below is locked.
-// - Personal data (users, scans, reports) is readable and writable only by
-//   its owner, checked against request.auth.uid, never a client-sent value.
-// - Reference data (medicines, batches, pharmacies) is read-only for
-//   signed-in users; only the Admin SDK seed script can write it.
-// - Every write is validated against the ERD: exact field set, types, enum
-//   values and server timestamps, so clients can't add fields or forge dates.
-//
-// Tests: backend/test/firestore.rules.test.mjs (run with `npm test` in backend/).
+// Deny by default: anything not matched below is locked.
+// Personal data is readable and writable only by its owner.
+// Reference data is read-only for signed-in users.
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // ---------- helpers ----------
-
     function signedIn() {
       return request.auth != null;
     }
@@ -29,13 +19,11 @@ service cloud.firestore {
       return request.resource.data;
     }
 
-    // The write contains exactly the required keys plus any of the optional ones.
     function hasShape(required, optional) {
       return data().keys().hasAll(required)
         && data().keys().hasOnly(required.concat(optional));
     }
 
-    // None of `keys` changed in this update.
     function unchanged(keys) {
       return !data().diff(resource.data).affectedKeys().hasAny(keys);
     }
@@ -48,13 +36,9 @@ service cloud.firestore {
       return value == null || isText(value, 0, max);
     }
 
-    // The client sent FieldValue.serverTimestamp() for this field.
     function isNow(value) {
       return value == request.time;
     }
-
-    // ---------- users ----------
-    // Doc ID = Firebase Auth uid. Owner only.
 
     match /users/{uid} {
       function validUser() {
@@ -71,13 +55,10 @@ service cloud.firestore {
 
       allow read, delete: if isUser(uid);
       allow create: if isUser(uid) && validUser() && isNow(data().createdAt);
-      // Profile edits: identity fields and createdAt are fixed.
       allow update: if isUser(uid)
         && validUser()
         && unchanged(['uid', 'email', 'authProvider', 'createdAt']);
     }
-
-    // ---------- reference data (seeded by Admin SDK) ----------
 
     match /medicines/{medicineId} {
       allow read: if signedIn();
@@ -94,25 +75,17 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // ---------- scans ----------
-    // Create / read / delete own. Scans are a log, so no updates.
-
     match /scans/{scanId} {
       allow read, delete: if isUser(resource.data.userId);
       allow create: if isUser(data().userId)
         && hasShape(['userId', 'result', 'method', 'scannedAt'], ['scanId', 'batchId'])
         && data().get('scanId', scanId) == scanId
-        // batchId is missing or null when the code matched no batch.
         && isOptionalText(data().get('batchId', null), 128)
         && data().result in ['genuine', 'flagged', 'notFound']
         && data().method in ['camera', 'manual', 'upload']
         && isNow(data().scannedAt);
       allow update: if false;
     }
-
-    // ---------- reports ----------
-    // Own only. Editable and withdrawable only while still pending; the
-    // review status is set by the regulator side, never by the client.
 
     match /reports/{reportId} {
       function validReport() {
