@@ -12,7 +12,7 @@ import '../widgets/auth_text_field.dart';
 import '../widgets/continue_with_google.dart';
 import 'login_page.dart';
 
-/// 04 Register. On success the new user is unverified, so the AuthGate shows
+/// 04 Register. On success the new user is unverified, so the router shows
 /// Verify email by itself.
 class RegisterPage extends StatelessWidget {
   const RegisterPage({super.key});
@@ -108,7 +108,7 @@ class _RegisterViewState extends State<RegisterView> {
                 const SizedBox(height: 16),
                 AuthTextField(
                   label: 'Phone',
-                  hint: '+254 7XX XXX XXX',
+                  hint: '+250 7XX XXX XXX',
                   controller: _phone,
                   keyboardType: TextInputType.phone,
                   textInputAction: TextInputAction.next,

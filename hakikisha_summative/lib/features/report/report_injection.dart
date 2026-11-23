@@ -10,7 +10,7 @@ import 'presentation/bloc/report_cubit.dart';
 void registerReportDependencies(GetIt sl) {
   sl
     ..registerLazySingleton<ReportRemoteDataSource>(
-      () => ReportRemoteDataSource(FirebaseFirestore.instance),
+      () => ReportRemoteDataSource(sl<FirebaseFirestore>()),
     )
     ..registerLazySingleton<ReportRepository>(
       () => ReportRepositoryImpl(sl<ReportRemoteDataSource>()),

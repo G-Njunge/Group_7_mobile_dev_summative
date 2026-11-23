@@ -18,7 +18,7 @@ class GoogleSignInState extends Equatable {
 }
 
 /// "Continue with Google". On success the AuthBloc's stream picks up the
-/// user and the AuthGate moves on (Google users skip Verify email, because
+/// user and the router moves on (Google users skip Verify email, because
 /// Google has already verified their address).
 class GoogleSignInCubit extends Cubit<GoogleSignInState> {
   GoogleSignInCubit(this._repository) : super(const GoogleSignInState());

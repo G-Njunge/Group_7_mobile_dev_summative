@@ -107,7 +107,7 @@ Use these instead of restyling. They follow the Figma file and support light and
 | Sign-out, session state | `context.read<SessionCubit>()` |
 | User settings (scan sound, vibration, save history) | `context.read<SettingsCubit>().state.settings` |
 
-**Translations:** add each new string to both `lib/core/l10n/app_en.arb` and `app_sw.arb`, then use `AppLocalizations.of(context).yourKey`. The Dart code is generated on `flutter pub get` / `flutter run` (or run `flutter gen-l10n`).
+**Translations:** the app supports English, Kiswahili and Kinyarwanda. Add each new string to all three files in `lib/core/l10n/` (`app_en.arb`, `app_sw.arb`, `app_rw.arb`), then use `AppLocalizations.of(context).yourKey`. The Dart code is generated on `flutter pub get` / `flutter run` (or run `flutter gen-l10n`). Flutter has no built-in Kinyarwanda strings, so its own widgets (dialog buttons, tooltips) fall back to English; see `lib/core/l10n/app_localizations_delegates.dart`.
 
 **Plugging in your feature:** in `lib/core/router/app_router.dart`, replace your `_placeholder(...)` with a `GoRoute` to your page. In `lib/core/di/injection.dart`, call your `register<Feature>Dependencies(sl)`.
 
@@ -152,10 +152,10 @@ These field names are the contract. Use them exactly in models, security rules a
 | Collection | Fields (PK, FK) | Access |
 |---|---|---|
 | `users` | **uid (PK)**, fullName, email, phone, authProvider (`password` / `google`), photoUrl, createdAt | Owner only |
-| `medicines` | **medicineId (PK)**, name, manufacturer, ppbRegNo, dosageForm, strength | Signed-in read, no client write |
+| `medicines` | **medicineId (PK)**, name, manufacturer, registrationNo, dosageForm, strength | Signed-in read, no client write |
 | `batches` | **batchId (PK)**, *medicineId (FK)*, batchNumber, gtin, expiryDate, status (`valid` / `recalled` / `counterfeit`) | Signed-in read, no client write |
 | `scans` | **scanId (PK)**, *userId (FK)*, *batchId (FK, null if not found)*, result (`genuine` / `flagged` / `notFound`), method (`camera` / `manual` / `upload`), scannedAt | Create / read / delete own; no update |
-| `reports` | **reportId (PK)**, *userId (FK)*, *scanId (FK, optional)*, *pharmacyId (FK, optional)*, description, photoUrls, status (`pending` / `reviewed`), createdAt, updatedAt | Own only; update / delete while pending |
+| `reports` | **reportId (PK)**, *userId (FK)*, *scanId (FK, optional)*, *pharmacyId (FK, optional)*, medicineName, batchNumber (optional), purchaseLocation (optional), description, photoUrls (empty: Storage not used), status (`pending` / `reviewed`), createdAt, updatedAt | Own only; update / delete while pending |
 | `pharmacies` | **pharmacyId (PK)**, name, licenseNo, address, lat, lng, phone, verified | Signed-in read, no client write |
 
 - The `users` doc ID is the Firebase Auth `uid`.

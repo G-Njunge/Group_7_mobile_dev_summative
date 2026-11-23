@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hakikisha_summative/core/l10n/app_localizations_delegates.dart';
 import 'package:hakikisha_summative/core/l10n/generated/app_localizations.dart';
 import 'package:hakikisha_summative/features/history/domain/entities/scan_entity.dart';
 import 'package:hakikisha_summative/features/history/domain/entities/scan_summary.dart';
@@ -54,7 +55,9 @@ Future<_FakeRepo> _pumpPage(WidgetTester tester) async {
 
   await tester.pumpWidget(
     MaterialApp.router(
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      // The app's full list, which includes the material_ui strings the
+      // drawer needs.
+      localizationsDelegates: appLocalizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       routerConfig: router,
     ),

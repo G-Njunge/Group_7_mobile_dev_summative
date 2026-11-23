@@ -6,7 +6,8 @@ enum ThemePreference { system, light, dark }
 
 enum AppLanguage {
   english('en', 'English'),
-  swahili('sw', 'Kiswahili');
+  swahili('sw', 'Kiswahili'),
+  kinyarwanda('rw', 'Ikinyarwanda');
 
   const AppLanguage(this.code, this.nativeName);
 
