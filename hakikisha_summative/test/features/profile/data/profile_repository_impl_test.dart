@@ -1,16 +1,39 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hakikisha_summative/features/profile/data/datasources/profile_remote_data_source.dart';
 import 'package:hakikisha_summative/features/profile/data/repositories/profile_repository_impl.dart';
 
+class _FakeUser extends Fake implements User {
+  bool deleted = false;
+
+  @override
+  Future<void> delete() async {
+    deleted = true;
+  }
+}
+
+class _FakeFirebaseAuth extends Fake implements FirebaseAuth {
+  _FakeFirebaseAuth(this._user);
+
+  final _FakeUser? _user;
+
+  @override
+  User? get currentUser => _user;
+}
+
 void main() {
   late FakeFirebaseFirestore firestore;
+  late _FakeUser fakeUser;
   late ProfileRepositoryImpl repository;
 
   setUp(() async {
     firestore = FakeFirebaseFirestore();
-    repository = ProfileRepositoryImpl(ProfileRemoteDataSource(firestore));
+    fakeUser = _FakeUser();
+    repository = ProfileRepositoryImpl(
+      ProfileRemoteDataSource(firestore, auth: _FakeFirebaseAuth(fakeUser)),
+    );
 
     await firestore.collection('users').doc('u1').set({
       'uid': 'u1',
@@ -62,7 +85,11 @@ void main() {
     expect(data['phone'], isNull);
   });
 
-  test('deleteAccount is not available yet', () {
-    expect(() => repository.deleteAccount('u1'), throwsUnsupportedError);
+  test('deleteAccount deletes the users document and auth user', () async {
+    await repository.deleteAccount('u1');
+
+    final doc = await firestore.collection('users').doc('u1').get();
+    expect(doc.exists, isFalse);
+    expect(fakeUser.deleted, isTrue);
   });
 }

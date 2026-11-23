@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/widgets/confirm_dialog.dart';
 import '../../../auth/presentation/widgets/auth_buttons.dart';
 import '../../../auth/presentation/widgets/auth_text_field.dart';
 import '../../domain/entities/profile_entity.dart';
@@ -21,12 +22,24 @@ class EditProfilePage extends StatelessWidget {
         body: BlocConsumer<ProfileCubit, ProfileState>(
           listenWhen: (previous, current) =>
               previous.status != current.status &&
-              current.status == ProfileStatus.saved,
+              (current.status == ProfileStatus.saved ||
+                  current.status == ProfileStatus.deleted ||
+                  current.status == ProfileStatus.error),
           listener: (context, state) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(const SnackBar(content: Text('Profile updated.')));
-            Navigator.of(context).pop();
+            if (state.status == ProfileStatus.saved) {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('Profile updated.')));
+              Navigator.of(context).pop();
+            } else if (state.status == ProfileStatus.deleted) {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('Account deleted.')));
+            } else if (state.status == ProfileStatus.error &&
+                state.errorMessage != null) {
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(content: Text(state.errorMessage!)));
+            }
           },
           builder: (context, state) {
             final profile = state.profile;
@@ -36,6 +49,7 @@ class EditProfilePage extends StatelessWidget {
             return _EditProfileForm(
               profile: profile,
               saving: state.status == ProfileStatus.saving,
+              deleting: state.status == ProfileStatus.deleting,
             );
           },
         ),
@@ -49,8 +63,13 @@ class EditProfilePage extends StatelessWidget {
 class _EditProfileForm extends StatefulWidget {
   final ProfileEntity profile;
   final bool saving;
+  final bool deleting;
 
-  const _EditProfileForm({required this.profile, required this.saving});
+  const _EditProfileForm({
+    required this.profile,
+    required this.saving,
+    required this.deleting,
+  });
 
   @override
   State<_EditProfileForm> createState() => _EditProfileFormState();
@@ -72,7 +91,7 @@ class _EditProfileFormState extends State<_EditProfileForm> {
   }
 
   void _submit() {
-    if (widget.saving) return;
+    if (widget.saving || widget.deleting) return;
     final isValid = context.read<EditProfileFormCubit>().validate(
       fullName: _nameController.text,
       phone: _phoneController.text,
@@ -85,9 +104,26 @@ class _EditProfileFormState extends State<_EditProfileForm> {
     }
   }
 
+  Future<void> _confirmDeleteAccount() async {
+    if (widget.saving || widget.deleting) return;
+    final cubit = context.read<ProfileCubit>();
+
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'Delete account?',
+      message: 'This will permanently remove your profile and account. This cannot be undone.',
+      confirmLabel: 'Delete account',
+      cancelLabel: 'Cancel',
+    );
+    if (!confirmed || !mounted) return;
+
+    await cubit.deleteAccount();
+  }
+
   @override
   Widget build(BuildContext context) {
     final formCubit = context.read<EditProfileFormCubit>();
+    final busy = widget.saving || widget.deleting;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -127,7 +163,22 @@ class _EditProfileFormState extends State<_EditProfileForm> {
             const SizedBox(height: 24),
             PrimaryButton(
               label: widget.saving ? 'Saving…' : 'Save changes',
-              onPressed: _submit,
+              onPressed: busy ? () {} : _submit,
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: busy ? null : _confirmDeleteAccount,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.error,
+                  side: BorderSide(color: Theme.of(context).colorScheme.error),
+                  minimumSize: const Size.fromHeight(48),
+                ),
+                child: Text(
+                  widget.deleting ? 'Deleting account…' : 'Delete account',
+                ),
+              ),
             ),
           ],
         ),

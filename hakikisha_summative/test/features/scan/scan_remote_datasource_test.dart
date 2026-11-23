@@ -17,7 +17,7 @@ void main() {
       'medicineId': 'med_1',
       'name': 'Coartem 80/480',
       'manufacturer': 'Novartis',
-      'ppbRegNo': 'RWANDA-FDA24/HM/0042',
+      'registrationNo': 'RWANDA-FDA24/HM/0042',
       'dosageForm': 'Tablet',
       'strength': '80/480mg',
     });

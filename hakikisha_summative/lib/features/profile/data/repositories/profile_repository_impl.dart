@@ -29,12 +29,8 @@ class ProfileRepositoryImpl implements ProfileRepository {
     'photoUrl': photoUrl,
   });
 
-  /// Not built yet: with our security rules the profile document can only
-  /// be deleted while still signed in, so the order needs care. It is on the
-  /// team's cut list and goes under Known Limitations.
   @override
-  Future<void> deleteAccount(String uid) =>
-      throw UnsupportedError('Account deletion is not available yet.');
+  Future<void> deleteAccount(String uid) => _remote.deleteUser(uid);
 
   ProfileEntity _toEntity(UserModel user) => ProfileEntity(
     uid: user.uid,

@@ -4,7 +4,7 @@ class MedicineEntity extends Equatable {
   final String medicineId;
   final String name;
   final String manufacturer;
-  final String rfdaRegNo; // Maps to Firestore 'ppbRegNo' per ERD contract
+  final String rfdaRegNo; // Maps to Firestore 'registrationNo' per ERD contract
   final String dosageForm;
   final String strength;
 

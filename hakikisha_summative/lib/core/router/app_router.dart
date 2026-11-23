@@ -18,9 +18,13 @@ import '../../features/profile/presentation/bloc/profile_cubit.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/report/presentation/pages/counterfeit_report_page.dart';
 import '../../features/report/presentation/pages/my_reports_page.dart';
+import '../../features/scan/domain/repositories/scan_repository.dart';
+import '../../features/scan/presentation/bloc/scan_bloc.dart';
+import '../../features/scan/presentation/pages/home_scan_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
 import '../di/injection.dart';
 import '../session/session_cubit.dart';
+import '../widgets/app_scaffold.dart';
 import 'app_routes.dart';
 import 'placeholder_page.dart';
 
@@ -55,7 +59,40 @@ GoRouter createAppRouter(SessionCubit session) => GoRouter(
       ),
     ),
     // M2: scan & verification
-    _placeholder(AppRoutes.home, 'Home'),
+    GoRoute(
+      path: AppRoutes.home,
+      builder: (context, _) {
+        final user = context.select((AuthBloc bloc) => bloc.state.user);
+        // On a cold start the AuthBloc can be a frame behind the session.
+        if (user == null) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        final firstName = (user.fullName ?? user.email)
+            .trim()
+            .split(RegExp(r'\s+'))
+            .first;
+        // BlocProvider owns the ScanBloc, so it's closed when Home is left.
+        // AppScaffold gives Home the shared frame and the drawer.
+        return BlocProvider(
+          create: (_) => sl<ScanBloc>(),
+          child: AppScaffold(
+            showLogo: true,
+            maxContentWidth: null,
+            body: HomeScanPage(
+              userFirstName: firstName,
+              userId: user.uid,
+              scanRepository: sl<ScanRepository>(),
+              onOpenPharmacyMap: () => context.go(AppRoutes.pharmacies),
+              onOpenReport: ({medicineName, batchNumber}) =>
+                  context.go(AppRoutes.report),
+              onOpenHistory: () => context.go(AppRoutes.history),
+            ),
+          ),
+        );
+      },
+    ),
     // M3: history & profile
     GoRoute(
       path: AppRoutes.history,
