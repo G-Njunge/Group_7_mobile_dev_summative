@@ -32,6 +32,17 @@ class HistoryCubit extends Cubit<HistoryState> {
 
   void setFilter(HistoryFilter filter) => emit(state.copyWith(filter: filter));
 
+  /// Deletes one scan. The live feed removes it from the list by itself.
+  /// Returns false if Firestore refused, so the screen can tell the user.
+  Future<bool> deleteScan(String scanId) async {
+    try {
+      await _repository.deleteScan(scanId);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   @override
   Future<void> close() {
     _subscription?.cancel();

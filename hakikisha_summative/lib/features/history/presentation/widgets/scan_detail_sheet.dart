@@ -1,13 +1,18 @@
-// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 
+import '../../../../core/l10n/generated/app_localizations.dart';
+import '../../../../core/theme/app_palette.dart';
 import '../../domain/entities/scan_summary.dart';
 import '../utils/scan_date_format.dart';
-import 'scan_tile.dart';
+import '../utils/scan_result_labels.dart';
 
 /// Opens a bottom sheet with the full details of one scan.
 void showScanDetailSheet(BuildContext context, ScanSummary summary) {
+  final l10n = AppLocalizations.of(context);
   final scan = summary.scan;
+  final title = summary.medicineName.isEmpty
+      ? l10n.historyUnknownMedicine
+      : summary.medicineName;
 
   showModalBottomSheet<void>(
     context: context,
@@ -19,16 +24,25 @@ void showScanDetailSheet(BuildContext context, ScanSummary summary) {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              summary.medicineName,
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
+            Text(title, style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 16),
-            _DetailRow(label: 'Result', value: formatResult(scan.result)),
-            _DetailRow(label: 'Method', value: scan.method),
-            _DetailRow(label: 'Scanned', value: formatScanTime(scan.scannedAt)),
-            _DetailRow(label: 'Batch', value: scan.batchId ?? 'Not found'),
-            _DetailRow(label: 'Scan ID', value: scan.scanId),
+            _DetailRow(
+              label: l10n.historyResult,
+              value: resultLabel(l10n, scan.result),
+            ),
+            _DetailRow(
+              label: l10n.historyMethod,
+              value: methodLabel(l10n, scan.method),
+            ),
+            _DetailRow(
+              label: l10n.historyScanned,
+              value: formatScanTime(scan.scannedAt),
+            ),
+            _DetailRow(
+              label: l10n.historyBatch,
+              value: scan.batchId ?? l10n.historyNotFound,
+            ),
+            _DetailRow(label: l10n.historyScanId, value: scan.scanId),
           ],
         ),
       ),
@@ -37,10 +51,10 @@ void showScanDetailSheet(BuildContext context, ScanSummary summary) {
 }
 
 class _DetailRow extends StatelessWidget {
+  const _DetailRow({required this.label, required this.value});
+
   final String label;
   final String value;
-
-  const _DetailRow({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +63,12 @@ class _DetailRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(flex: 1, child: Text(label)),
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(color: context.palette.textMuted),
+            ),
+          ),
           Expanded(flex: 3, child: Text(value)),
         ],
       ),

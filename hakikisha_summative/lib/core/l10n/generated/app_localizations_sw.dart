@@ -139,4 +139,75 @@ class AppLocalizationsSw extends AppLocalizations {
 
   @override
   String get profileSaveChanges => 'Hifadhi mabadiliko';
+
+  @override
+  String get historyScans => 'Skani';
+
+  @override
+  String get historyGenuine => 'Halisi';
+
+  @override
+  String get historyFlagged => 'Zenye shaka';
+
+  @override
+  String get historyNotFound => 'Haikupatikana';
+
+  @override
+  String get historyRecentScans => 'SKANI ZA HIVI KARIBUNI';
+
+  @override
+  String get historyEmpty => 'Hakuna skani za kuonyesha bado.';
+
+  @override
+  String get historyLoadError =>
+      'Hatukuweza kupakia historia yako ya skani. Tafadhali jaribu tena.';
+
+  @override
+  String get historyUnknownMedicine => 'Dawa isiyojulikana';
+
+  @override
+  String get historyResult => 'Matokeo';
+
+  @override
+  String get historyMethod => 'Njia';
+
+  @override
+  String get historyScanned => 'Ilichanganuliwa';
+
+  @override
+  String get historyBatch => 'Kundi';
+
+  @override
+  String get historyScanId => 'Kitambulisho cha skani';
+
+  @override
+  String get historyMethodCamera => 'Kamera';
+
+  @override
+  String get historyMethodManual => 'Imeingizwa kwa mkono';
+
+  @override
+  String get historyMethodUpload => 'Picha iliyopakiwa';
+
+  @override
+  String get historyDeleteTitle => 'Futa skani hii?';
+
+  @override
+  String get historyDeleteMessage => 'Itaondolewa kwenye historia yako.';
+
+  @override
+  String get historyDeleteConfirm => 'Futa';
+
+  @override
+  String get historyDeleteCancel => 'Ghairi';
+
+  @override
+  String get historyDeleted => 'Skani imefutwa.';
+
+  @override
+  String get historyDeleteError =>
+      'Hatukuweza kufuta skani hiyo. Tafadhali jaribu tena.';
+
+  @override
+  String get historyDeleteTooltip => 'Futa skani';
 }
