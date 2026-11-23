@@ -39,7 +39,7 @@ class AuthRepositoryImpl implements AuthRepository {
           uid: user.uid,
           fullName: name,
           email: user.email ?? email.trim(),
-          phone: normalizeKenyanPhone(phone) ?? phone.trim(),
+          phone: normalizeRwandanPhone(phone) ?? phone.trim(),
           authProvider: UserModel.providerPassword,
         ),
       );

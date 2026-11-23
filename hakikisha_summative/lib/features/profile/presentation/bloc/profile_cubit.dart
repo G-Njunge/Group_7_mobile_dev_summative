@@ -49,8 +49,8 @@ class ProfileCubit extends Cubit<ProfileState> {
 
     emit(state.copyWith(status: ProfileStatus.saving));
     try {
-      // Same format as registration: +254712345678, or null if blank/invalid.
-      final normalizedPhone = normalizeKenyanPhone(phone ?? '');
+      // Same format as registration: +250788123456, or null if blank/invalid.
+      final normalizedPhone = normalizeRwandanPhone(phone ?? '');
       await _repository.updateProfile(
         uid: current.uid,
         fullName: fullName.trim(),

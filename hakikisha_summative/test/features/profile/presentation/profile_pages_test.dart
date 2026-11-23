@@ -34,7 +34,7 @@ final _profile = ProfileEntity(
   uid: 'u1',
   fullName: 'Amina Wanjiru',
   email: 'amina@example.com',
-  phone: '+254712345678',
+  phone: '+250788123456',
   authProvider: 'password',
   createdAt: DateTime(2026, 11, 1),
 );
@@ -72,7 +72,7 @@ void main() {
 
     expect(find.text('Amina Wanjiru'), findsOneWidget);
     expect(find.text('amina@example.com'), findsOneWidget);
-    expect(find.text('+254712345678'), findsOneWidget);
+    expect(find.text('+250788123456'), findsOneWidget);
     expect(find.text('Email and password'), findsOneWidget);
     expect(find.text('Edit profile'), findsOneWidget);
   });
@@ -87,7 +87,7 @@ void main() {
     expect(find.text('Enter your full name.'), findsOneWidget);
   });
 
-  testWidgets('edit page rejects a phone that is not a Kenyan number', (
+  testWidgets('edit page rejects a phone that is not a Rwandan number', (
     tester,
   ) async {
     await _pumpWithProfile(tester, const EditProfilePage());
@@ -97,7 +97,7 @@ void main() {
     await tester.pump();
 
     expect(
-      find.text('Enter a Kenyan mobile number, like 0712 345 678.'),
+      find.text('Enter a Rwandan mobile number, like 0788 123 456.'),
       findsOneWidget,
     );
   });
