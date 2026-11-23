@@ -19,11 +19,11 @@ class BatchEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        batchId,
-        medicineId,
-        batchNumber,
-        gtin,
-        expiryDate,
-        status,
-      ];
+    batchId,
+    medicineId,
+    batchNumber,
+    gtin,
+    expiryDate,
+    status,
+  ];
 }

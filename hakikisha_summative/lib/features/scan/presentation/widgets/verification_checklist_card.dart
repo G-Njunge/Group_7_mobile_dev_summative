@@ -25,10 +25,8 @@ class VerificationChecklistCard extends StatelessWidget {
           children: [
             Text(
               'CHECK IT YOURSELF',
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.1,
-                  ),
+              style: Theme.of(context).textTheme.labelLarge
+                  ?.copyWith(fontWeight: FontWeight.bold, letterSpacing: 1.1),
             ),
             const SizedBox(height: 12),
             ..._items.map(

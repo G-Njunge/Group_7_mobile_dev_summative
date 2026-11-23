@@ -1,15 +1,15 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:hakikisha/features/scan/domain/entities/batch_entity.dart';
-import 'package:hakikisha/features/scan/domain/entities/medicine_entity.dart';
-import 'package:hakikisha/features/scan/domain/entities/scan_record_entity.dart';
-import 'package:hakikisha/features/scan/domain/entities/verification_outcome.dart';
-import 'package:hakikisha/features/scan/domain/repositories/scan_repository.dart';
-import 'package:hakikisha/features/scan/domain/usecases/verify_medicine_usecase.dart';
-import 'package:hakikisha/features/scan/presentation/bloc/scan_bloc.dart';
-import 'package:hakikisha/features/scan/presentation/bloc/scan_event.dart';
-import 'package:hakikisha/features/scan/presentation/bloc/scan_state.dart';
+import 'package:hakikisha_summative/features/scan/domain/entities/batch_entity.dart';
+import 'package:hakikisha_summative/features/scan/domain/entities/medicine_entity.dart';
+import 'package:hakikisha_summative/features/scan/domain/entities/scan_record_entity.dart';
+import 'package:hakikisha_summative/features/scan/domain/entities/verification_outcome.dart';
+import 'package:hakikisha_summative/features/scan/domain/repositories/scan_repository.dart';
+import 'package:hakikisha_summative/features/scan/domain/usecases/verify_medicine_usecase.dart';
+import 'package:hakikisha_summative/features/scan/presentation/bloc/scan_bloc.dart';
+import 'package:hakikisha_summative/features/scan/presentation/bloc/scan_event.dart';
+import 'package:hakikisha_summative/features/scan/presentation/bloc/scan_state.dart';
 
 class MockScanRepository extends Mock implements ScanRepository {}
 

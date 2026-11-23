@@ -19,11 +19,11 @@ class MedicineEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        medicineId,
-        name,
-        manufacturer,
-        rfdaRegNo,
-        dosageForm,
-        strength,
-      ];
+    medicineId,
+    name,
+    manufacturer,
+    rfdaRegNo,
+    dosageForm,
+    strength,
+  ];
 }

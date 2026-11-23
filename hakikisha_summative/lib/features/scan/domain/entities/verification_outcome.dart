@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+
 import 'batch_entity.dart';
 import 'medicine_entity.dart';
 
@@ -33,11 +34,5 @@ class VerificationResult extends Equatable {
   }
 
   @override
-  List<Object?> get props => [
-        status,
-        flagReason,
-        medicine,
-        batch,
-        queriedCode,
-      ];
+  List<Object?> get props => [status, flagReason, medicine, batch, queriedCode];
 }

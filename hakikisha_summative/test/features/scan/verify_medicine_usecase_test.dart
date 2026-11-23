@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hakikisha/features/scan/domain/entities/batch_entity.dart';
-import 'package:hakikisha/features/scan/domain/entities/medicine_entity.dart';
-import 'package:hakikisha/features/scan/domain/entities/verification_outcome.dart';
-import 'package:hakikisha/features/scan/domain/usecases/verify_medicine_usecase.dart';
+import 'package:hakikisha_summative/features/scan/domain/entities/batch_entity.dart';
+import 'package:hakikisha_summative/features/scan/domain/entities/medicine_entity.dart';
+import 'package:hakikisha_summative/features/scan/domain/entities/verification_outcome.dart';
+import 'package:hakikisha_summative/features/scan/domain/usecases/verify_medicine_usecase.dart';
 
 void main() {
   late VerifyMedicineUseCase useCase;

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../domain/entities/batch_entity.dart';
 
 class BatchModel extends BatchEntity {

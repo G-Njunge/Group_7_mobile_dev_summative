@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../domain/entities/scan_record_entity.dart';
 
 class ScanRecordModel extends ScanRecordEntity {

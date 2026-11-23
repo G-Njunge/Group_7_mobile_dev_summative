@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+
 import '../../domain/entities/scan_record_entity.dart';
 import '../bloc/scan_bloc.dart';
 import '../bloc/scan_event.dart';
@@ -32,8 +33,8 @@ class _CameraScannerPageState extends State<CameraScannerPage> {
     _hasDispatched = true;
     Navigator.of(context).pop();
     context.read<ScanBloc>().add(
-          ScanCodeSubmitted(code: code, method: ScanMethod.camera),
-        );
+      ScanCodeSubmitted(code: code, method: ScanMethod.camera),
+    );
   }
 
   @override
@@ -51,10 +52,7 @@ class _CameraScannerPageState extends State<CameraScannerPage> {
       ),
       body: Stack(
         children: [
-          MobileScanner(
-            controller: _controller,
-            onDetect: _onDetect,
-          ),
+          MobileScanner(controller: _controller, onDetect: _onDetect),
           Center(
             child: Container(
               width: 260,

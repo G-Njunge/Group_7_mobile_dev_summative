@@ -1,5 +1,7 @@
 import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../domain/entities/scan_record_entity.dart';
 import '../../domain/repositories/scan_repository.dart';
 import '../../domain/usecases/verify_medicine_usecase.dart';
@@ -16,7 +18,9 @@ class ScanBloc extends Bloc<ScanEvent, ScanState> {
     required this.repository,
     required this.verifyMedicineUseCase,
     required this.getCurrentUserId,
-    this.animationDuration = const Duration(seconds: 2), // Required 2s animation[cite: 21]
+    this.animationDuration = const Duration(
+      seconds: 2,
+    ), // Required 2s animation[cite: 21]
   }) : super(const ScanInitial()) {
     on<ScanCodeSubmitted>(_onScanCodeSubmitted);
     on<ScanResetRequested>(_onScanResetRequested);

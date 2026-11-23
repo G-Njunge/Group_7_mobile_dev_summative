@@ -27,13 +27,13 @@ class ScanRecordEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        scanId,
-        userId,
-        batchId,
-        result,
-        method,
-        scannedAt,
-        medicineName,
-        batchNumber,
-      ];
+    scanId,
+    userId,
+    batchId,
+    result,
+    method,
+    scannedAt,
+    medicineName,
+    batchNumber,
+  ];
 }

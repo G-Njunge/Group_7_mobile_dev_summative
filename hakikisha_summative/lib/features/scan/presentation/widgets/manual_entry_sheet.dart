@@ -3,10 +3,7 @@ import 'package:flutter/material.dart';
 class ManualEntrySheet extends StatefulWidget {
   final ValueChanged<String> onCodeSubmitted;
 
-  const ManualEntrySheet({
-    super.key,
-    required this.onCodeSubmitted,
-  });
+  const ManualEntrySheet({super.key, required this.onCodeSubmitted});
 
   @override
   State<ManualEntrySheet> createState() => _ManualEntrySheetState();
@@ -43,9 +40,8 @@ class _ManualEntrySheetState extends State<ManualEntrySheet> {
           children: [
             Text(
               'Enter Batch or GTIN Code',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(context).textTheme.titleLarge
+                  ?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(

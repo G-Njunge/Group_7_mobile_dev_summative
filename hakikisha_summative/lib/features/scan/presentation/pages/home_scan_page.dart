@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+
 import '../../domain/entities/scan_record_entity.dart';
 import '../../domain/repositories/scan_repository.dart';
 import '../bloc/scan_bloc.dart';
@@ -42,8 +43,8 @@ class HomeScanPage extends StatelessWidget {
       if (!context.mounted) return;
       if (rawValue != null && rawValue.isNotEmpty) {
         context.read<ScanBloc>().add(
-              ScanCodeSubmitted(code: rawValue, method: ScanMethod.upload),
-            );
+          ScanCodeSubmitted(code: rawValue, method: ScanMethod.upload),
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -63,8 +64,8 @@ class HomeScanPage extends StatelessWidget {
       builder: (_) => ManualEntrySheet(
         onCodeSubmitted: (code) {
           context.read<ScanBloc>().add(
-                ScanCodeSubmitted(code: code, method: ScanMethod.manual),
-              );
+            ScanCodeSubmitted(code: code, method: ScanMethod.manual),
+          );
         },
       ),
     );
@@ -82,16 +83,16 @@ class HomeScanPage extends StatelessWidget {
                 onOpenPharmacyMap: onOpenPharmacyMap,
                 onOpenReport: () => onOpenReport(
                   medicineName: state.result.medicine?.name,
-                  batchNumber: state.result.batch?.batchNumber ??
+                  batchNumber:
+                      state.result.batch?.batchNumber ??
                       state.result.queriedCode,
                 ),
               ),
             ),
           );
         } else if (state is ScanFailure) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)),
-          );
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(state.message)));
         }
       },
       child: BlocBuilder<ScanBloc, ScanState>(
@@ -109,17 +110,15 @@ class HomeScanPage extends StatelessWidget {
                       Text(
                         'MURAHO, ${userFirstName.toUpperCase()}',
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              letterSpacing: 1.2,
-                              color: const Color(0xFF1B4332),
-                              fontWeight: FontWeight.w700,
-                            ),
+                          letterSpacing: 1.2,
+                          color: const Color(0xFF1B4332),
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                       const SizedBox(height: 6),
                       Text(
                         'What are you checking today?',
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineSmall
+                        style: Theme.of(context).textTheme.headlineSmall
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 20),
@@ -226,9 +225,7 @@ class HomeScanPage extends StatelessWidget {
                         children: [
                           Text(
                             'RECENT SCAN',
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelLarge
+                            style: Theme.of(context).textTheme.labelLarge
                                 ?.copyWith(fontWeight: FontWeight.bold),
                           ),
                           TextButton(

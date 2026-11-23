@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../domain/entities/verification_outcome.dart';
 import '../widgets/verification_checklist_card.dart';
 
@@ -17,8 +18,9 @@ class ScanResultPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isGenuine = result.status == VerificationStatus.genuine;
-    final bannerColor =
-        isGenuine ? const Color(0xFF1B4332) : const Color(0xFF9B2226);
+    final bannerColor = isGenuine
+        ? const Color(0xFF1B4332)
+        : const Color(0xFF9B2226);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Scan result')),
@@ -49,7 +51,9 @@ class ScanResultPage extends StatelessWidget {
                         ),
                         const SizedBox(width: 10),
                         Text(
-                          isGenuine ? 'VERIFIED GENUINE' : 'DO NOT USE — FLAGGED',
+                          isGenuine
+                              ? 'VERIFIED GENUINE'
+                              : 'DO NOT USE — FLAGGED',
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -87,13 +91,14 @@ class ScanResultPage extends StatelessWidget {
                       children: [
                         Text(
                           '${result.medicine!.name} ${result.medicine!.strength}',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleLarge
+                          style: Theme.of(context).textTheme.titleLarge
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 12),
-                        _detailRow('Manufacturer', result.medicine!.manufacturer),
+                        _detailRow(
+                          'Manufacturer',
+                          result.medicine!.manufacturer,
+                        ),
                         _detailRow('Batch Number', result.batch!.batchNumber),
                         _detailRow(
                           'Expiry Date',

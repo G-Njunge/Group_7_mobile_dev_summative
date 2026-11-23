@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../models/batch_model.dart';
 import '../models/medicine_model.dart';
 import '../models/scan_record_model.dart';
@@ -67,36 +68,40 @@ class ScanRemoteDataSource {
         .limit(1)
         .snapshots()
         .asyncMap((snapshot) async {
-      if (snapshot.docs.isEmpty) return null;
+          if (snapshot.docs.isEmpty) return null;
 
-      final doc = snapshot.docs.first;
-      final data = doc.data();
-      final batchId = data['batchId'] as String? ?? '';
+          final doc = snapshot.docs.first;
+          final data = doc.data();
+          final batchId = data['batchId'] as String? ?? '';
 
-      String? medicineName;
-      String? batchNumber;
+          String? medicineName;
+          String? batchNumber;
 
-      if (batchId.isNotEmpty) {
-        final batchDoc =
-            await firestore.collection('batches').doc(batchId).get();
-        if (batchDoc.exists && batchDoc.data() != null) {
-          final batchData = batchDoc.data()!;
-          batchNumber = batchData['batchNumber'] as String?;
-          final medId = batchData['medicineId'] as String? ?? '';
-          if (medId.isNotEmpty) {
-            final medDoc =
-                await firestore.collection('medicines').doc(medId).get();
-            medicineName = medDoc.data()?['name'] as String?;
+          if (batchId.isNotEmpty) {
+            final batchDoc = await firestore
+                .collection('batches')
+                .doc(batchId)
+                .get();
+            if (batchDoc.exists && batchDoc.data() != null) {
+              final batchData = batchDoc.data()!;
+              batchNumber = batchData['batchNumber'] as String?;
+              final medId = batchData['medicineId'] as String? ?? '';
+              if (medId.isNotEmpty) {
+                final medDoc = await firestore
+                    .collection('medicines')
+                    .doc(medId)
+                    .get();
+                medicineName = medDoc.data()?['name'] as String?;
+              }
+            }
           }
-        }
-      }
 
-      return ScanRecordModel.fromFirestore(
-        doc.id,
-        data,
-        medicineName: medicineName,
-        batchNumber: batchNumber,
-      );
-    });
+          return ScanRecordModel.fromFirestore(
+            doc.id,
+            data,
+            medicineName: medicineName,
+            batchNumber: batchNumber,
+          );
+        });
   }
 }

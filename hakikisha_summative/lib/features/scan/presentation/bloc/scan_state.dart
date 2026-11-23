@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+
 import '../../domain/entities/verification_outcome.dart';
 
 abstract class ScanState extends Equatable {
@@ -25,10 +26,7 @@ class ScanComplete extends ScanState {
   final VerificationResult result;
   final bool savedToHistory;
 
-  const ScanComplete({
-    required this.result,
-    this.savedToHistory = true,
-  });
+  const ScanComplete({required this.result, this.savedToHistory = true});
 
   @override
   List<Object?> get props => [result, savedToHistory];
