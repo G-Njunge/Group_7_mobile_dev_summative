@@ -183,3 +183,9 @@ flutter test --coverage
 - Packages: `bloc_test`, `mocktail`, `fake_cloud_firestore`.
 - Each member writes unit tests for their bloc or cubit and logic, plus at least one widget test for their screens.
 - Blocs depend on repository **interfaces**, so tests mock the interface rather than Firebase.
+
+
+### Flutter Analyze
+<img width="688" height="76" alt="flutter anlyze" src="https://github.com/user-attachments/assets/90c74a66-5992-4f68-82b4-e6fdf4921960" />
+
+
